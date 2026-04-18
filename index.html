@@ -42,6 +42,9 @@
   .btn-ghost { color: var(--mid); font-size: 14px; text-decoration: none; display: flex; align-items: center; gap: 6px; }
   .btn-ghost::after { content: '→'; }
   .hero-card { background: var(--cream); border-radius: 20px; padding: 2.5rem; border: 1px solid var(--border); }
+  .hero-photo { border-radius: 16px; overflow: hidden; margin-bottom: 1.25rem; border: 1px solid var(--border); position: relative; }
+  .hero-photo img { width: 100%; height: 220px; object-fit: cover; display: block; }
+  .hero-photo-label { position: absolute; bottom: 10px; left: 10px; background: rgba(28,28,26,0.75); color: #fff; font-size: 11px; padding: 4px 10px; border-radius: 100px; font-weight: 500; letter-spacing: 0.04em; }
   .hero-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 1.5rem; }
   .hero-stat { background: var(--warm-white); border-radius: 12px; padding: 1.25rem; border: 1px solid var(--border); }
   .hero-stat-num { font-family: var(--serif); font-size: 32px; line-height: 1; margin-bottom: 4px; }
@@ -185,6 +188,10 @@
     </div>
     <div class="hero-visual">
       <div class="hero-card">
+        <div class="hero-photo">
+          <img src="hallway-after.jpg" alt="Hallway transformation — Specialty Home Painting Orlando">
+          <span class="hero-photo-label">✓ Real Orlando project</span>
+        </div>
         <div class="hero-stat-grid">
           <div class="hero-stat"><div class="hero-stat-num">20+</div><div class="hero-stat-label">Years of experience</div></div>
           <div class="hero-stat"><div class="hero-stat-num">5★</div><div class="hero-stat-label">Rated on Thumbtack</div></div>
