@@ -583,24 +583,28 @@
   }
 
   function submitForm() {
-    const subject = `Estimate Request — ${answers.service} — ${answers.name}`;
     const params = new URLSearchParams({
       name: answers.name,
       email: answers.email,
       phone: answers.phone || 'Not provided',
       service: answers.service,
-      message: answers.message,
-      subject: subject
+      message: answers.message
     });
 
-    const img = new Image();
-    img.src = APPS_SCRIPT_URL + '?' + params.toString();
-    img.onload = img.onerror = function() {
-      showBotMessage(`✅ Thanks ${answers.name}! Your request has been sent. Issam will get back to you within 15 minutes. You can also call or text directly at (904) 514-7016.`);
-    };
+    // Use hidden iframe to call Apps Script without CORS issues
+    let iframe = document.getElementById('formIframe');
+    if (!iframe) {
+      iframe = document.createElement('iframe');
+      iframe.id = 'formIframe';
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+    }
+    iframe.src = APPS_SCRIPT_URL + '?' + params.toString();
+
+    // Show confirmation after short delay
     setTimeout(() => {
       showBotMessage(`✅ Thanks ${answers.name}! Your request has been sent. Issam will get back to you within 15 minutes. You can also call or text directly at (904) 514-7016.`);
-    }, 2000);
+    }, 1500);
   }
 </script>
 
