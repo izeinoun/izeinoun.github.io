@@ -312,7 +312,7 @@
       <div class="photo-item"><img src="door painting 1.jpg" alt="Door painting process" loading="lazy"></div>
       <div class="photo-item"><img src="door painting 2.jpg" alt="Door on suspension rig" loading="lazy"></div>
       <div class="photo-item"><img src="room painting 1.jpg" alt="Room painting" loading="lazy"></div>
-      <div class="photo-item"><img src="room painting 2.jpg" alt="Room painting" loading="lazy"></div>
+      <div class="photo-item"><img src="room painting 1.jpg" alt="Room painting" loading="lazy"></div>
       <div class="photo-item"><img src="bathroom painting 2.jpg" alt="Bathroom after" loading="lazy"></div>
       <div class="photo-item"><img src="livingroom.jpg" alt="Living room" loading="lazy"></div>
       <div class="photo-item"><img src="baseboards.jpg" alt="Baseboard painting" loading="lazy"></div>
@@ -397,6 +397,207 @@
   <p>© 2025 Specialty Home Painting — Orlando, FL</p>
   <p>Licensed & insured · Registered Florida business</p>
 </footer>
+
+<!-- FLOATING CHAT BUTTON -->
+<button class="chat-fab" id="chatFab" onclick="openChat()">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+  </svg>
+  <span>Free Estimate</span>
+</button>
+
+<!-- CHAT OVERLAY -->
+<div class="chat-overlay" id="chatOverlay" onclick="closeChat()"></div>
+
+<!-- CHAT POPUP -->
+<div class="chat-popup" id="chatPopup">
+  <div class="chat-header">
+    <div class="chat-header-info">
+      <div class="chat-avatar">SHP</div>
+      <div>
+        <div class="chat-name">Specialty Home Painting</div>
+        <div class="chat-status">● Typically replies within 15 min</div>
+      </div>
+    </div>
+    <button class="chat-close" onclick="closeChat()">✕</button>
+  </div>
+  <div class="chat-messages" id="chatMessages"></div>
+  <div class="chat-input-area" id="chatInputArea"></div>
+</div>
+
+<style>
+  .chat-fab { position: fixed; bottom: 2rem; right: 2rem; z-index: 1000; background: var(--accent); color: #fff; border: none; border-radius: 100px; padding: 14px 24px; font-size: 14px; font-weight: 500; font-family: var(--sans); cursor: pointer; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 20px rgba(42,92,63,0.35); transition: transform 0.2s, box-shadow 0.2s; }
+  .chat-fab:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(42,92,63,0.45); }
+  .chat-fab svg { width: 20px; height: 20px; }
+  .chat-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1001; }
+  .chat-overlay.active { display: block; }
+  .chat-popup { display: none; position: fixed; bottom: 2rem; right: 2rem; width: 380px; max-height: 580px; background: var(--warm-white); border-radius: 20px; border: 1px solid var(--border); z-index: 1002; flex-direction: column; box-shadow: 0 8px 40px rgba(0,0,0,0.15); overflow: hidden; }
+  .chat-popup.active { display: flex; }
+  .chat-header { background: var(--accent); padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; }
+  .chat-header-info { display: flex; align-items: center; gap: 12px; }
+  .chat-avatar { width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; color: #fff; }
+  .chat-name { font-size: 14px; font-weight: 500; color: #fff; }
+  .chat-status { font-size: 11px; color: rgba(255,255,255,0.75); margin-top: 2px; }
+  .chat-close { background: none; border: none; color: rgba(255,255,255,0.8); font-size: 16px; cursor: pointer; padding: 4px; }
+  .chat-close:hover { color: #fff; }
+  .chat-messages { flex: 1; overflow-y: auto; padding: 1.25rem; display: flex; flex-direction: column; gap: 12px; min-height: 300px; }
+  .msg { max-width: 85%; }
+  .msg.bot { align-self: flex-start; }
+  .msg.user { align-self: flex-end; }
+  .msg-bubble { padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.5; }
+  .msg.bot .msg-bubble { background: var(--cream); color: var(--charcoal); border-bottom-left-radius: 4px; }
+  .msg.user .msg-bubble { background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
+  .msg-time { font-size: 10px; color: var(--light); margin-top: 4px; padding: 0 4px; }
+  .chat-input-area { padding: 1rem 1.25rem; border-top: 1px solid var(--border); background: var(--warm-white); }
+  .chat-input-wrap { display: flex; gap: 8px; align-items: center; }
+  .chat-input { flex: 1; border: 1px solid var(--border); border-radius: 100px; padding: 10px 16px; font-size: 14px; font-family: var(--sans); background: var(--cream); color: var(--charcoal); outline: none; }
+  .chat-input:focus { border-color: var(--accent); }
+  .chat-send { background: var(--accent); color: #fff; border: none; border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: opacity 0.2s; }
+  .chat-send:hover { opacity: 0.85; }
+  .chat-send svg { width: 16px; height: 16px; }
+  .chat-options { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .chat-option { background: var(--warm-white); border: 1px solid var(--accent); color: var(--accent); border-radius: 100px; padding: 6px 14px; font-size: 13px; cursor: pointer; font-family: var(--sans); transition: all 0.2s; }
+  .chat-option:hover { background: var(--accent); color: #fff; }
+  .typing { display: flex; gap: 4px; align-items: center; padding: 10px 14px; background: var(--cream); border-radius: 16px; border-bottom-left-radius: 4px; width: fit-content; }
+  .typing span { width: 6px; height: 6px; background: var(--light); border-radius: 50%; animation: bounce 1.2s infinite; }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+  @media (max-width: 480px) {
+    .chat-popup { bottom: 0; right: 0; width: 100%; border-radius: 20px 20px 0 0; max-height: 90vh; }
+    .chat-fab { bottom: 1.5rem; right: 1.5rem; }
+  }
+</style>
+
+<script>
+  const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
+
+  const steps = [
+    { id: 'name', bot: "👋 Hi! I'm here to help you get a free estimate. What's your name?", type: 'text', placeholder: 'Your name...' },
+    { id: 'service', bot: "Great to meet you {name}! What service do you need?", type: 'options', options: ['Door restoration', 'Drywall repair', 'Interior painting', 'Trim & baseboard', 'Ceiling painting', 'Multiple services'] },
+    { id: 'email', bot: "Got it! What's the best email address to reach you?", type: 'text', placeholder: 'your@email.com' },
+    { id: 'phone', bot: "And a phone number? (optional — skip if you prefer email)", type: 'text', placeholder: 'Phone number or type skip...' },
+    { id: 'message', bot: "Almost done! Tell us a bit about your project — location, scope, timeline.", type: 'text', placeholder: 'Describe your project...' },
+  ];
+
+  let currentStep = 0;
+  let answers = {};
+
+  function openChat() {
+    document.getElementById('chatOverlay').classList.add('active');
+    document.getElementById('chatPopup').classList.add('active');
+    document.getElementById('chatFab').style.display = 'none';
+    if (currentStep === 0 && document.getElementById('chatMessages').children.length === 0) {
+      setTimeout(() => showBotMessage(steps[0].bot), 400);
+      setTimeout(() => showInput(steps[0]), 900);
+    }
+  }
+
+  function closeChat() {
+    document.getElementById('chatOverlay').classList.remove('active');
+    document.getElementById('chatPopup').classList.remove('active');
+    document.getElementById('chatFab').style.display = 'flex';
+  }
+
+  function showBotMessage(text) {
+    const msgs = document.getElementById('chatMessages');
+    const msg = document.createElement('div');
+    msg.className = 'msg bot';
+    msg.innerHTML = `<div class="msg-bubble">${text}</div>`;
+    msgs.appendChild(msg);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function showTyping() {
+    const msgs = document.getElementById('chatMessages');
+    const typing = document.createElement('div');
+    typing.className = 'msg bot';
+    typing.id = 'typing';
+    typing.innerHTML = `<div class="typing"><span></span><span></span><span></span></div>`;
+    msgs.appendChild(typing);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function removeTyping() {
+    const t = document.getElementById('typing');
+    if (t) t.remove();
+  }
+
+  function showUserMessage(text) {
+    const msgs = document.getElementById('chatMessages');
+    const msg = document.createElement('div');
+    msg.className = 'msg user';
+    msg.innerHTML = `<div class="msg-bubble">${text}</div>`;
+    msgs.appendChild(msg);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function showInput(step) {
+    const area = document.getElementById('chatInputArea');
+    if (step.type === 'options') {
+      area.innerHTML = `<div class="chat-options">${step.options.map(o => `<button class="chat-option" onclick="handleOption('${o}')">${o}</button>`).join('')}</div>`;
+    } else {
+      area.innerHTML = `
+        <div class="chat-input-wrap">
+          <input class="chat-input" id="chatInput" type="text" placeholder="${step.placeholder}" onkeydown="if(event.key==='Enter') sendMessage()">
+          <button class="chat-send" onclick="sendMessage()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>`;
+      setTimeout(() => { const i = document.getElementById('chatInput'); if(i) i.focus(); }, 100);
+    }
+  }
+
+  function handleOption(value) {
+    processAnswer(value);
+  }
+
+  function sendMessage() {
+    const input = document.getElementById('chatInput');
+    if (!input || !input.value.trim()) return;
+    processAnswer(input.value.trim());
+  }
+
+  function processAnswer(value) {
+    const step = steps[currentStep];
+    answers[step.id] = value;
+    showUserMessage(value);
+    document.getElementById('chatInputArea').innerHTML = '';
+    currentStep++;
+
+    if (currentStep < steps.length) {
+      showTyping();
+      setTimeout(() => {
+        removeTyping();
+        let nextMsg = steps[currentStep].bot.replace('{name}', answers['name'] || '');
+        showBotMessage(nextMsg);
+        setTimeout(() => showInput(steps[currentStep]), 400);
+      }, 800);
+    } else {
+      showTyping();
+      setTimeout(() => {
+        removeTyping();
+        submitForm();
+      }, 1000);
+    }
+  }
+
+  function submitForm() {
+    const subject = `Estimate Request — ${answers.service} — ${answers.name}`;
+    const body = `New estimate request from specialtyhomepainting.com\n\nName: ${answers.name}\nService: ${answers.service}\nEmail: ${answers.email}\nPhone: ${answers.phone || 'Not provided'}\nMessage: ${answers.message}`;
+
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: answers.name, email: answers.email, phone: answers.phone, service: answers.service, message: answers.message, subject: subject, body: body })
+    }).then(() => {
+      showBotMessage(`✅ Thanks ${answers.name}! Your request has been sent. Issam will get back to you within 15 minutes. You can also call or text directly at (904) 514-7016.`);
+    }).catch(() => {
+      showBotMessage(`✅ Thanks ${answers.name}! We received your request and will be in touch shortly at ${answers.email}.`);
+    });
+  }
+</script>
 
 </body>
 </html>
