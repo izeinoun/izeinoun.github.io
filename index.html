@@ -587,28 +587,24 @@
     if (submitted) return;
     submitted = true;
 
-    const payload = {
+    const params = new URLSearchParams({
       name: answers.name,
       email: answers.email,
       phone: answers.phone || 'Not provided',
       service: answers.service,
       message: answers.message
-    };
-
-    fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    })
-    .then(r => r.json())
-    .then(data => {
-      console.log('Success:', data);
-      showBotMessage(`✅ Thanks ${answers.name}! Your request has been sent. Issam will get back to you within 15 minutes. You can also call or text directly at (904) 514-7016.`);
-    })
-    .catch(err => {
-      console.log('Error:', err);
-      showBotMessage(`✅ Thanks ${answers.name}! We received your request and will be in touch at ${answers.email} shortly.`);
     });
+
+    fetch(APPS_SCRIPT_URL + '?' + params.toString())
+      .then(r => r.json())
+      .then(data => {
+        console.log('Success:', data);
+        showBotMessage(`✅ Thanks ${answers.name}! Your request has been sent. Issam will get back to you within 15 minutes. You can also call or text directly at (904) 514-7016.`);
+      })
+      .catch(err => {
+        console.log('Error:', err);
+        showBotMessage(`✅ Thanks ${answers.name}! We received your request and will be in touch at ${answers.email} shortly.`);
+      });
   }
 </script>
 
