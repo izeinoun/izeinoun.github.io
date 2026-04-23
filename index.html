@@ -731,9 +731,19 @@ Only include BUTTONS when it makes sense — not every message needs them.`;
       message: `CHAT SUMMARY:\n\n${summary}`
     };
 
+    // Send to Issam
     emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, templateParams)
       .then(() => {
-        showBotMessage(`✅ Done! A summary has been sent to ${email}. Issam will follow up within 15 minutes. You can also call or text directly at (904) 514-7016. 😊`);
+        // Also send copy to customer
+        return emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
+          ...templateParams,
+          name: email,
+          email: 'issam@specialtyhomepainting.com', // swap — send customer copy to themselves
+          message: `Hi! Here's a summary of your chat with Specialty Home Painting:\n\n${summary}\n\nIssam will follow up with you shortly. You can also call or text at (904) 514-7016.`
+        });
+      })
+      .then(() => {
+        showBotMessage(`✅ Done! Your request has been sent to our team. Issam will follow up with you at ${email} within 15 minutes. You can also call or text directly at (904) 514-7016. 😊`);
         showQuickButtons(['📞 Call Issam', '✕ Close chat']);
       })
       .catch(err => {
