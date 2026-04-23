@@ -476,7 +476,7 @@
   // SPECIALTY HOME PAINTING — CLAUDE CHAT WIDGET
   // ============================================================
 
-  const PROXY_URL = 'https://script.google.com/macros/s/AKfycbxGD22hnOKDN7b_2ey8ygp_Kh4ScTr4GicmeMWLVmK80pV-B_sGHnH0507oDcHWOrdU8g/exec';
+  const PROXY_URL = 'your-apps-script-proxy-url-here'; // replace after deploying chat-proxy.gs
   const EMAILJS_SERVICE = 'service_s9zggu9';
   const EMAILJS_TEMPLATE = 'template_yrs9zfk';
 
@@ -603,7 +603,7 @@ Only include BUTTONS when it makes sense — not every message needs them.`;
     area.innerHTML = `
       <div class="chat-options" id="quickButtons">${buttonsHtml}</div>
       <div class="chat-input-wrap" style="margin-top:8px;">
-        <input class="chat-input" id="chatInput" type="text" placeholder="Or type your message..." onkeydown="if(event.key==='Enter') sendMessage()">
+        <input class="chat-input" id="chatInput" type="text" placeholder="Or type your message..." autocomplete="off" onkeydown="if(event.key==='Enter') sendMessage()">
         <button class="chat-send" onclick="sendMessage()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         </button>
@@ -615,7 +615,7 @@ Only include BUTTONS when it makes sense — not every message needs them.`;
     const area = document.getElementById('chatInputArea');
     area.innerHTML = `
       <div class="chat-input-wrap">
-        <input class="chat-input" id="chatInput" type="text" placeholder="Type your message..." onkeydown="if(event.key==='Enter') sendMessage()">
+        <input class="chat-input" id="chatInput" type="text" placeholder="Type your message..." autocomplete="off" onkeydown="if(event.key==='Enter') sendMessage()">
         <button class="chat-send" onclick="sendMessage()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         </button>
