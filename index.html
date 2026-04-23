@@ -476,7 +476,7 @@
   // SPECIALTY HOME PAINTING — CLAUDE CHAT WIDGET
   // ============================================================
 
-  const PROXY_URL = 'https://script.google.com/macros/s/AKfycbxGD22hnOKDN7b_2ey8ygp_Kh4ScTr4GicmeMWLVmK80pV-B_sGHnH0507oDcHWOrdU8g/exec'; // replace after deploying chat-proxy.gs
+  const PROXY_URL = 'https://script.google.com/macros/s/AKfycbxGD22hnOKDN7b_2ey8ygp_Kh4ScTr4GicmeMWLVmK80pV-B_sGHnH0507oDcHWOrdU8g/exec';
   const EMAILJS_SERVICE = 'service_s9zggu9';
   const EMAILJS_TEMPLATE = 'template_yrs9zfk';
 
@@ -661,7 +661,10 @@ Only include BUTTONS when it makes sense — not every message needs them.`;
     }
 
     // Check if this looks like an email address
-    if (text.includes('@') && text.includes('.') && chatHistory.some(m => m.content.includes('email address'))) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    console.log('Testing if email:', text, emailRegex.test(text));
+    if (emailRegex.test(text)) {
+      console.log('Email detected — calling sendEmailSummary');
       customerEmail = text;
       showTyping();
       setTimeout(() => {
