@@ -476,7 +476,7 @@
   // SPECIALTY HOME PAINTING — CLAUDE CHAT WIDGET
   // ============================================================
 
-  const PROXY_URL = 'https://script.google.com/macros/s/AKfycbxGD22hnOKDN7b_2ey8ygp_Kh4ScTr4GicmeMWLVmK80pV-B_sGHnH0507oDcHWOrdU8g/exec'; // replace after deploying chat-proxy.gs
+  const PROXY_URL = 'https://script.google.com/macros/s/AKfycbxGD22hnOKDN7b_2ey8ygp_Kh4ScTr4GicmeMWLVmK80pV-B_sGHnH0507oDcHWOrdU8g/exec';
   const EMAILJS_SERVICE = 'service_s9zggu9';
   const EMAILJS_TEMPLATE = 'template_yrs9zfk';
 
@@ -674,18 +674,15 @@ Only include BUTTONS when it makes sense — not every message needs them.`;
     // Add to history
     chatHistory.push({ role: 'user', content: text });
 
-    // Call proxy (which calls Anthropic securely server-side)
+    // Call proxy via GET (avoids CORS preflight issues)
     showTyping();
     try {
-      const response = await fetch(PROXY_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: text,
-          history: chatHistory.slice(-10) // send last 10 messages for context
-        })
+      const params = new URLSearchParams({
+        message: text,
+        history: encodeURIComponent(JSON.stringify(chatHistory.slice(-10)))
       });
 
+      const response = await fetch(PROXY_URL + '?' + params.toString());
       const data = await response.json();
       removeTyping();
 
