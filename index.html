@@ -476,7 +476,7 @@
   // SPECIALTY HOME PAINTING — CLAUDE CHAT WIDGET
   // ============================================================
 
-  const ANTHROPIC_API_KEY = 'you_key_here'; // replace with your key
+  const PROXY_URL = 'https://script.google.com/macros/s/AKfycbxGD22hnOKDN7b_2ey8ygp_Kh4ScTr4GicmeMWLVmK80pV-B_sGHnH0507oDcHWOrdU8g/exec'; // replace after deploying chat-proxy.gs
   const EMAILJS_SERVICE = 'service_s9zggu9';
   const EMAILJS_TEMPLATE = 'template_yrs9zfk';
 
@@ -674,30 +674,23 @@ Only include BUTTONS when it makes sense — not every message needs them.`;
     // Add to history
     chatHistory.push({ role: 'user', content: text });
 
-    // Call Claude API
+    // Call proxy (which calls Anthropic securely server-side)
     showTyping();
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      const response = await fetch(PROXY_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-calls': 'true'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 400,
-          system: CHAT_SYSTEM_PROMPT,
-          messages: chatHistory
+          message: text,
+          history: chatHistory.slice(-10) // send last 10 messages for context
         })
       });
 
       const data = await response.json();
       removeTyping();
 
-      if (data.content && data.content[0]) {
-        const fullReply = data.content[0].text;
+      if (data.success && data.reply) {
+        const fullReply = data.reply;
 
         // Extract buttons if present
         const buttonMatch = fullReply.match(/\[BUTTONS:\s*([^\]]+)\]/);
@@ -712,10 +705,13 @@ Only include BUTTONS when it makes sense — not every message needs them.`;
         } else {
           showTextInput();
         }
+      } else {
+        showBotMessage("Sorry, I'm having trouble connecting. Please call or text Issam directly at (904) 514-7016.");
+        showTextInput();
       }
     } catch (err) {
       removeTyping();
-      console.error('Claude API error:', err);
+      console.error('Proxy error:', err);
       showBotMessage("Sorry, I'm having trouble connecting. Please call or text Issam directly at (904) 514-7016.");
       showTextInput();
     }
