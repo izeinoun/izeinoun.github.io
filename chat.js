@@ -7,6 +7,10 @@
 const PROXY_URL = 'https://script.google.com/macros/s/AKfycbxGD22hnOKDN7b_2ey8ygp_Kh4ScTr4GicmeMWLVmK80pV-B_sGHnH0507oDcHWOrdU8g/exec';
 const EMAILJS_SERVICE = 'service_s9zggu9';
 const EMAILJS_TEMPLATE = 'template_yrs9zfk';
+const EMAILJS_PUBLIC_KEY = 'Tejd3zM9f6BJ9FpcE';
+
+// Initialize EmailJS
+emailjs.init(EMAILJS_PUBLIC_KEY);
 
 // ---- STATE ----
 let chatHistory = [];
@@ -187,6 +191,16 @@ async function processUserMessage(text) {
     return;
   }
 
+  // Check if user wants to view/download quote
+  if (text.toLowerCase().includes('view quote') || text.toLowerCase().includes('download')) {
+    if (currentQuote) {
+      generateAndShowPDF();
+    } else {
+      showBotMessage("I don't have a quote ready yet. Let me gather a few more details first.");
+    }
+    return;
+  }
+
   // Add to history
   chatHistory.push({ role: 'user', content: text });
 
@@ -238,21 +252,34 @@ async function handleReply(reply) {
   const buttonMatch = reply.match(/\[BUTTONS:\s*([^\]]+)\]/);
   const cleanReply = reply.replace(/\[BUTTONS:[^\]]+\]/g, '').trim();
 
-  // Check if quote is mentioned — show quote buttons
-  const hasQuote = reply.includes('estimate') || reply.includes('quote') ||
-                   reply.includes('total') || reply.includes('$');
+  // Check if reply contains an estimate — show quote buttons
+  const hasEstimate = reply.includes('Total estimate') || 
+                      reply.includes('total estimate') ||
+                      reply.includes('Total:') ||
+                      (reply.includes('$') && reply.includes('estimate')) ||
+                      (reply.includes('$') && reply.includes('total'));
 
   chatHistory.push({ role: 'assistant', content: cleanReply });
   showBotMessage(cleanReply);
 
+  // Build a basic quote from chat text if estimate detected but no action
+  if (hasEstimate && !currentQuote) {
+    currentQuote = { 
+      items: [{ description: 'See chat estimate above', low: 0, high: 0 }],
+      total_low: 0, 
+      total_high: 0,
+      summary: cleanReply
+    };
+  }
+
   if (buttonMatch) {
     const buttons = buttonMatch[1].split('|').map(b => b.trim());
-    if (hasQuote && currentQuote) {
+    if (hasEstimate) {
       showQuoteButtons();
     } else {
       showQuickButtons(buttons);
     }
-  } else if (hasQuote && currentQuote) {
+  } else if (hasEstimate) {
     showQuoteButtons();
   } else {
     showTextInput();
