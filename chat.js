@@ -46,11 +46,26 @@ function closeChat() {
 // ============================================================
 // MESSAGE DISPLAY
 // ============================================================
+function renderMarkdown(text) {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/^#{1,3}\s(.+)$/gm, '<strong>$1</strong>')
+    .replace(/---+/g, '<hr style="border:none;border-top:1px solid #ddd;margin:8px 0;">')
+    .replace(/^\|\s*(.+?)\s*\|\s*(.+?)\s*\|$/gm, (match, col1, col2) => {
+      if (col1.match(/^[-\s]+$/) && col2.match(/^[-\s]+$/)) return ''; // skip separator row
+      return `<div style="display:flex;gap:12px;justify-content:space-between;padding:3px 0;border-bottom:1px solid #eee;"><span>${col1}</span><span><strong>${col2}</strong></span></div>`;
+    })
+    .replace(/^\s*[-•]\s(.+)$/gm, '<div style="padding:2px 0;">• $1</div>')
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>');
+}
+
 function showBotMessage(text) {
   const msgs = document.getElementById('chatMessages');
   const msg = document.createElement('div');
   msg.className = 'msg bot';
-  msg.innerHTML = `<div class="msg-bubble">${text}</div>`;
+  msg.innerHTML = `<div class="msg-bubble">${renderMarkdown(text)}</div>`;
   msgs.appendChild(msg);
   msgs.scrollTop = msgs.scrollHeight;
 }
@@ -408,7 +423,6 @@ function buildPDF() {
 
   const green = [42, 92, 63];
   const charcoal = [28, 28, 26];
-  const lightGray = [245, 244, 239];
 
   // Header background
   doc.setFillColor(...green);
@@ -424,17 +438,14 @@ function buildPDF() {
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   doc.text('Door Restoration · Drywall Repair · Interior Painting · Orlando, FL', 20, 26);
-
-  // Contact
   doc.text('(904) 514-7016  |  issam@specialtyhomepainting.com  |  specialtyhomepainting.com', 20, 33);
 
-  // Quote title
+  // Quote title + date
   doc.setTextColor(...charcoal);
   doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
   doc.text('ESTIMATE', 20, 55);
 
-  // Date and quote number
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(100, 100, 100);
@@ -457,49 +468,45 @@ function buildPDF() {
   doc.setLineWidth(0.5);
   doc.line(20, 75, 190, 75);
 
-  // Line items
-  let y = 90;
-  doc.setFillColor(...lightGray);
-  doc.rect(20, 80, 170, 8, 'F');
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10);
+  // Estimate content — render from chat history
+  const estimateText = getEstimateText();
   doc.setTextColor(...charcoal);
-  doc.text('Service', 22, 86);
-  doc.text('Est. Low', 130, 86);
-  doc.text('Est. High', 160, 86);
-
+  doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
-  const items = currentQuote.items || [];
-  items.forEach((item, i) => {
-    if (i % 2 === 0) {
-      doc.setFillColor(252, 252, 250);
-      doc.rect(20, y - 5, 170, 8, 'F');
+
+  const lines = doc.splitTextToSize(estimateText, 170);
+  let y = 85;
+
+  lines.forEach(line => {
+    if (y > 255) {
+      doc.addPage();
+      y = 20;
     }
-    doc.setTextColor(...charcoal);
-    doc.text(item.description || '', 22, y);
-    doc.text(`$${item.low || 0}`, 130, y);
-    doc.text(`$${item.high || 0}`, 160, y);
-    y += 10;
+
+    // Style headers/totals differently
+    const isBold = line.match(/^(total|estimate|item)/i) ||
+                   line.includes('Total') ||
+                   line.startsWith('•');
+
+    if (isBold) {
+      doc.setFont('helvetica', 'bold');
+    } else {
+      doc.setFont('helvetica', 'normal');
+    }
+
+    // Indent bullet points
+    const x = line.startsWith('•') ? 25 : 20;
+    doc.text(line.replace(/^\*\*|\*\*$/g, '').replace(/^\*|\*$/g, ''), x, y);
+    y += 7;
   });
 
-  // Total
-  y += 5;
-  doc.setFillColor(...green);
-  doc.rect(20, y - 5, 170, 12, 'F');
-  doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(12);
-  doc.text('TOTAL ESTIMATE', 22, y + 3);
-  doc.text(`$${currentQuote.total_low || 0} — $${currentQuote.total_high || 0}`, 130, y + 3);
-
   // Notes
-  y += 25;
-  doc.setTextColor(100, 100, 100);
+  y += 10;
   doc.setFont('helvetica', 'italic');
   doc.setFontSize(9);
+  doc.setTextColor(120, 120, 120);
   doc.text('* This is a ballpark estimate. Final price confirmed after free in-person visit.', 20, y);
-  doc.text('* Prices include standard prep work and cleanup.', 20, y + 6);
-  doc.text('* Drywall damage larger than 1 inch priced separately after photo review.', 20, y + 12);
+  doc.text('* Minor drywall patches included in room price. Larger repairs quoted separately.', 20, y + 6);
 
   // Footer
   doc.setFillColor(...green);
@@ -508,9 +515,40 @@ function buildPDF() {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
   doc.text('Thank you for considering Specialty Home Painting!', 105, 283, { align: 'center' });
-  doc.text('We repair first, then refinish — no shortcuts, no painted-over problems.', 105, 289, { align: 'center' });
+  doc.text('We repair first, then refinish — no shortcuts.', 105, 289, { align: 'center' });
 
   return doc.output('datauristring');
+}
+
+// Extract estimate text from chat history or currentQuote
+function getEstimateText() {
+  // Use stored quote summary if available
+  if (currentQuote && currentQuote.summary) {
+    return stripMarkdown(currentQuote.summary);
+  }
+
+  // Otherwise find last bot message containing dollar amounts
+  const estimateMessages = chatHistory
+    .filter(m => m.role === 'assistant' && m.content.includes('$'))
+    .map(m => m.content);
+
+  if (estimateMessages.length > 0) {
+    return stripMarkdown(estimateMessages[estimateMessages.length - 1]);
+  }
+
+  return 'Please see your chat conversation for estimate details.';
+}
+
+// Strip markdown for PDF plain text rendering
+function stripMarkdown(text) {
+  return text
+    .replace(/\*\*/g, '')
+    .replace(/\*/g, '')
+    .replace(/#{1,6}\s/g, '')
+    .replace(/---+/g, '─────────────────')
+    .replace(/\|/g, '  ')
+    .replace(/^\s*[-]\s/gm, '• ')
+    .trim();
 }
 
 // ============================================================
