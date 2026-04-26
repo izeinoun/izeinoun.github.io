@@ -470,11 +470,12 @@ function buildPDF() {
 
   // Estimate content — render from chat history
   const estimateText = getEstimateText();
+  const decodedText = decodeURIComponent(estimateText).replace(/%/g, '');
   doc.setTextColor(...charcoal);
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
 
-  const lines = doc.splitTextToSize(estimateText, 170);
+  const lines = doc.splitTextToSize(decodedText, 170);
   let y = 85;
 
   lines.forEach(line => {
@@ -637,23 +638,23 @@ function sendChatSummary(email) {
     .map(m => `${m.role === 'user' ? 'Customer' : 'Agent'}: ${m.content}`)
     .join('\n\n');
 
-  // Send to Issam
+  // Send to Issam — CC customer
   emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
+    to_email: 'issam@specialtyhomepainting.com',
+    cc_email: email,
+    subject: `New Website Chat Lead — ${email}`,
     name: customerName || 'Website Chat Visitor',
-    email: 'issam@specialtyhomepainting.com',
-    customer_email: email,
     phone: 'Not provided',
-    service: 'Website Chat — New Lead',
     message: `New lead from website chat.\nCustomer email: ${email}\n\nCHAT SUMMARY:\n\n${summary}`
   });
 
-  // Send copy to customer
+  // Send to customer — CC Issam
   emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
+    to_email: email,
+    cc_email: 'issam@specialtyhomepainting.com',
+    subject: 'Your Estimate Request — Specialty Home Painting',
     name: 'Specialty Home Painting',
-    email: email,
-    customer_email: 'issam@specialtyhomepainting.com',
     phone: '(904) 514-7016',
-    service: 'Your Estimate Request — Specialty Home Painting',
     message: `Hi! Thank you for chatting with us.\n\nHere is a summary of your conversation:\n\n${summary}\n\nIssam will follow up with you shortly. You can also call or text at (904) 514-7016 or visit specialtyhomepainting.com`
   }).then(() => {
     showBotMessage(`✅ Your request has been sent! You should receive a copy at ${email}. Issam will follow up within 15 minutes. You can also call or text directly at (904) 514-7016. 😊`);
