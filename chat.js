@@ -262,12 +262,37 @@ async function handleReply(reply) {
   chatHistory.push({ role: 'assistant', content: cleanReply });
   showBotMessage(cleanReply);
 
-  // Build a basic quote from chat text if estimate detected but no action
+  // Build a quote from chat text if estimate detected but no action
   if (hasEstimate && !currentQuote) {
-    currentQuote = { 
-      items: [{ description: 'See chat estimate above', low: 0, high: 0 }],
-      total_low: 0, 
-      total_high: 0,
+    // Try to extract dollar amounts from the reply
+    const items = [];
+    const lines = cleanReply.split('\n');
+    let totalLow = 0;
+    let totalHigh = 0;
+
+    lines.forEach(line => {
+      // Match lines with dollar amounts like "Bedroom (small, good) | $150–$180"
+      const match = line.match(/([^|]+)\|\s*\$(\d+)[–-]\$?(\d+)/);
+      if (match && !line.toLowerCase().includes('total')) {
+        const desc = match[1].replace(/\*\*/g, '').trim();
+        const low = parseInt(match[2]);
+        const high = parseInt(match[3]);
+        items.push({ description: desc, low, high });
+        totalLow += low;
+        totalHigh += high;
+      }
+      // Match total line
+      const totalMatch = line.match(/total[^|]*\|\s*\*?\*?\$(\d+)[–-]\$?(\d+)/i);
+      if (totalMatch) {
+        totalLow = parseInt(totalMatch[1]);
+        totalHigh = parseInt(totalMatch[2]);
+      }
+    });
+
+    currentQuote = {
+      items: items.length > 0 ? items : [{ description: 'See estimate above', low: totalLow, high: totalHigh }],
+      total_low: totalLow,
+      total_high: totalHigh,
       summary: cleanReply
     };
   }
@@ -574,15 +599,26 @@ function sendChatSummary(email) {
     .map(m => `${m.role === 'user' ? 'Customer' : 'Agent'}: ${m.content}`)
     .join('\n\n');
 
+  // Send to Issam
   emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
     name: customerName || 'Website Chat Visitor',
     email: 'issam@specialtyhomepainting.com',
     customer_email: email,
     phone: 'Not provided',
-    service: 'See chat summary',
-    message: `CHAT SUMMARY:\n\n${summary}`
+    service: 'Website Chat — New Lead',
+    message: `New lead from website chat.\nCustomer email: ${email}\n\nCHAT SUMMARY:\n\n${summary}`
+  });
+
+  // Send copy to customer
+  emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
+    name: 'Specialty Home Painting',
+    email: email,
+    customer_email: 'issam@specialtyhomepainting.com',
+    phone: '(904) 514-7016',
+    service: 'Your Estimate Request — Specialty Home Painting',
+    message: `Hi! Thank you for chatting with us.\n\nHere is a summary of your conversation:\n\n${summary}\n\nIssam will follow up with you shortly. You can also call or text at (904) 514-7016 or visit specialtyhomepainting.com`
   }).then(() => {
-    showBotMessage(`✅ Your request has been sent to our team. Issam will follow up with you at ${email} within 15 minutes. You can also call or text directly at (904) 514-7016. 😊`);
+    showBotMessage(`✅ Your request has been sent! You should receive a copy at ${email}. Issam will follow up within 15 minutes. You can also call or text directly at (904) 514-7016. 😊`);
     showQuickButtons(['📄 View Quote', '📞 Call Issam', '✕ Close chat']);
   }).catch(err => {
     console.error('EmailJS error:', err);
