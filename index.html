@@ -33,8 +33,7 @@
   .nav-links a:hover { color: var(--charcoal); }
   .nav-cta { background: var(--accent) !important; color: #fff !important; padding: 8px 20px; border-radius: 100px; font-size: 13px !important; font-weight: 500 !important; }
   .hero { min-height: 88vh; display: grid; grid-template-columns: 1fr 1fr; align-items: center; max-width: 1100px; margin: 0 auto; padding: 5rem 2rem 4rem; gap: 4rem; }
-  .identity-bar { max-width: 1100px; margin: 0 auto; padding: 1.5rem 2rem 0; }
-  .identity-card { display: inline-flex; align-items: center; gap: 16px; background: var(--cream); border: 1px solid var(--border); border-radius: 100px; padding: 8px 24px 8px 8px; }
+  .identity-card { display: inline-flex; align-items: center; gap: 16px; background: var(--cream); border: 1px solid var(--border); border-radius: 100px; padding: 8px 24px 8px 8px; margin-bottom: 1.5rem; }
   .identity-photo { width: 56px; height: 56px; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 2px solid var(--accent); }
   .identity-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center 10%; display: block; }
   .identity-text { display: flex; flex-direction: column; }
@@ -158,7 +157,6 @@
   footer p { font-size: 12px; color: var(--light); }
 
   @media (max-width: 768px) {
-    .identity-bar { padding: 1.25rem 1.5rem 0; }
     .hero { grid-template-columns: 1fr; gap: 2.5rem; min-height: auto; padding: 3rem 1.5rem; }
     .hero-visual { order: -1; }
     .services-grid { grid-template-columns: 1fr; }
@@ -192,21 +190,18 @@
   </ul>
 </nav>
 
-<div class="identity-bar">
-  <div class="identity-card">
-    <div class="identity-photo">
-      <img src="issam-cropped.jpg" alt="Issam — Specialty Home Painting">
-    </div>
-    <div class="identity-text">
-      <div class="identity-name">Your unusual contractor.</div>
-      <div class="identity-sub">Tech professional by week, precision painter by weekend — your neighbor, not a crew.</div>
-    </div>
-  </div>
-</div>
-
 <section>
   <div class="hero">
     <div class="hero-text">
+      <div class="identity-card">
+        <div class="identity-photo">
+          <img src="issam-cropped.jpg" alt="Issam — Specialty Home Painting">
+        </div>
+        <div class="identity-text">
+          <div class="identity-name">Your unusual contractor.</div>
+          <div class="identity-sub">Tech professional by week, precision painter by weekend — your neighbor, not a crew.</div>
+        </div>
+      </div>
       <div class="hero-eyebrow">Orlando, FL — Repair & Refinish</div>
       <h1>Your home,<br><em>restored</em> to its<br>best finish.</h1>
       <p class="hero-desc">We fix cracks, patch drywall, restore worn doors, and deliver a flawless enamel finish — repair and refinish in a single engagement.</p>
