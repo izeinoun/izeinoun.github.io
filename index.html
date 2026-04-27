@@ -428,12 +428,12 @@
 </div>
 
 <style>
-  .chat-fab { position: fixed; bottom: 2rem; left: 2rem; z-index: 1000; background: var(--accent); color: #fff; border: none; border-radius: 100px; padding: 14px 24px; font-size: 14px; font-weight: 500; font-family: var(--sans); cursor: pointer; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 20px rgba(42,92,63,0.35); transition: transform 0.2s, box-shadow 0.2s; }
+  .chat-fab { position: fixed; bottom: 2rem; right: 2rem; z-index: 1000; background: var(--accent); color: #fff; border: none; border-radius: 100px; padding: 14px 24px; font-size: 14px; font-weight: 500; font-family: var(--sans); cursor: pointer; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 20px rgba(42,92,63,0.35); transition: transform 0.2s, box-shadow 0.2s; }
   .chat-fab:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(42,92,63,0.45); }
   .chat-fab svg { width: 20px; height: 20px; }
   .chat-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1001; }
   .chat-overlay.active { display: block; }
-  .chat-popup { display: none; position: fixed; bottom: 2rem; left: 2rem; width: 380px; max-height: 580px; background: var(--warm-white); border-radius: 20px; border: 1px solid var(--border); z-index: 1002; flex-direction: column; box-shadow: 0 8px 40px rgba(0,0,0,0.15); overflow: hidden; }
+  .chat-popup { display: none; position: fixed; bottom: 6rem; right: 2rem; width: 380px; max-height: 580px; background: var(--warm-white); border-radius: 20px; border: 1px solid var(--border); z-index: 1002; flex-direction: column; box-shadow: 0 8px 40px rgba(0,0,0,0.15); overflow: hidden; }
   .chat-popup.active { display: flex; }
   .chat-header { background: var(--accent); padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; }
   .chat-header-info { display: flex; align-items: center; gap: 12px; }
@@ -481,8 +481,8 @@
   .chat-option-quote { background: var(--accent); color: #fff; font-weight: 500; }
   .chat-option-quote:hover { opacity: 0.85; background: var(--accent); }
   @media (max-width: 480px) {
-    .chat-popup { bottom: 0; left: 0; width: 100%; border-radius: 20px 20px 0 0; max-height: 90vh; }
-    .chat-fab { bottom: 1.5rem; left: 1.5rem; }
+    .chat-popup { bottom: 5rem; right: 1rem; left: 1rem; width: auto; border-radius: 20px; max-height: 80vh; }
+    .chat-fab { bottom: 1.5rem; right: 1.5rem; }
   }
 </style>
 
