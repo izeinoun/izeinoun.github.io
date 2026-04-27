@@ -102,8 +102,12 @@
 
   /* ABOUT */
   .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
-  .about-img { border-radius: 20px; overflow: hidden; aspect-ratio: 3/4; border: 1px solid var(--border); }
+  .about-photos { display: flex; flex-direction: column; gap: 12px; }
+  .about-img { border-radius: 20px; overflow: hidden; border: 1px solid var(--border); position: relative; }
   .about-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .about-img.primary { aspect-ratio: 4/3; }
+  .about-img.secondary { aspect-ratio: 4/3; }
+  .about-img-label { position: absolute; bottom: 10px; left: 10px; background: rgba(28,28,26,0.72); color: #fff; font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 100px; letter-spacing: 0.04em; }
   .about-text p { font-size: 15px; color: var(--mid); line-height: 1.8; font-weight: 300; margin-bottom: 1rem; }
   .about-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 2rem; }
   .about-stat { background: var(--cream); border-radius: 12px; padding: 1.25rem; border: 1px solid var(--border); }
@@ -156,6 +160,8 @@
     .nav-links { display: none; }
     .ba-grid { grid-template-columns: 1fr; }
     .about-grid { grid-template-columns: 1fr; }
+    .about-photos { flex-direction: row; }
+    .about-img.primary, .about-img.secondary { aspect-ratio: 1; }
     .photo-grid { grid-template-columns: repeat(2, 1fr); }
     .section { padding: 3.5rem 1.5rem; }
     .gallery-section { padding: 3.5rem 1.5rem; }
@@ -325,8 +331,15 @@
 
 <div class="section" id="about">
   <div class="about-grid">
-    <div class="about-img">
-      <img src="door painting 1.jpg" alt="Issam at work — Specialty Home Painting Orlando">
+    <div class="about-photos">
+      <div class="about-img primary">
+        <img src="issam-drywall.jpg" alt="Issam applying drywall skim coat — Specialty Home Painting Orlando">
+        <span class="about-img-label">Drywall repair & skim coat</span>
+      </div>
+      <div class="about-img secondary">
+        <img src="issam-door-suspension.jpg" alt="Issam with door on horizontal suspension rig — Specialty Home Painting Orlando">
+        <span class="about-img-label">Door suspension technique</span>
+      </div>
     </div>
     <div class="about-text">
       <div class="section-label">About</div>
