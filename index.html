@@ -586,6 +586,14 @@
 
 <script>
 // ============================================================
+// EMAILJS — shared config (used by both contact form and chat)
+// ============================================================
+const EMAILJS_SERVICE    = 'service_s9zggu9';
+const EMAILJS_TEMPLATE   = 'template_yrs9zfk';
+const EMAILJS_PUBLIC_KEY = 'Tejd3zM9f6BJ9FpcE';
+emailjs.init(EMAILJS_PUBLIC_KEY);
+
+// ============================================================
 // CONTACT FORM — EmailJS submission + Google Sheets logging
 // ============================================================
 const CF_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwW4JaSlvo28cA2AjVDvCgUZX5aFUxoW6DSX0qndfN_Jm2VmSEcqWzbM_KPzadVw6G2/exec';
