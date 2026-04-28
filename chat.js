@@ -1,692 +1,662 @@
-// ============================================================
-// SPECIALTY HOME PAINTING — CHAT AGENT
-// chat.js — client side chat logic, action handler, PDF modal
-// ============================================================
-
-// ---- CONFIGURATION ----
-const PROXY_URL = 'https://script.google.com/macros/s/AKfycbxGD22hnOKDN7b_2ey8ygp_Kh4ScTr4GicmeMWLVmK80pV-B_sGHnH0507oDcHWOrdU8g/exec';
-const EMAILJS_SERVICE = 'service_s9zggu9';
-const EMAILJS_TEMPLATE = 'template_yrs9zfk';
-const EMAILJS_PUBLIC_KEY = 'Tejd3zM9f6BJ9FpcE';
-
-// Initialize EmailJS
-emailjs.init(EMAILJS_PUBLIC_KEY);
-
-// ---- STATE ----
-let chatHistory = [];
-let customerEmail = '';
-let customerName = '';
-let currentQuote = null;
-let chatOpen = false;
-
-// ============================================================
-// CHAT OPEN / CLOSE
-// ============================================================
-function openChat() {
-  document.getElementById('chatOverlay').classList.add('active');
-  document.getElementById('chatPopup').classList.add('active');
-  document.getElementById('chatFab').style.display = 'none';
-  chatOpen = true;
-
-  if (chatHistory.length === 0) {
-    setTimeout(() => {
-      showBotMessage("👋 Hi! Welcome to Specialty Home Painting. How can we help you today?");
-      showQuickButtons(['🖌️ Our Services', '💰 Get an Estimate', '📧 Email Us', '📞 Call Us']);
-    }, 400);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Specialty Home Painting — Orlando, FL</title>
+<meta name="description" content="Expert door restoration, drywall repair, and precision trim and ceiling painting in Orlando, FL. Serving homeowners, property managers, and real estate agents.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --cream: #F7F4EF;
+    --warm-white: #FDFCFA;
+    --charcoal: #1C1C1A;
+    --mid: #6B6860;
+    --light: #B8B4AC;
+    --accent: #2A5C3F;
+    --accent-light: #EAF2ED;
+    --border: rgba(28,28,26,0.10);
+    --serif: 'DM Serif Display', Georgia, serif;
+    --sans: 'DM Sans', sans-serif;
   }
-}
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--sans); background: var(--warm-white); color: var(--charcoal); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  nav { position: sticky; top: 0; z-index: 100; background: rgba(253,252,250,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 60px; }
+  .nav-brand { font-family: var(--serif); font-size: 18px; color: var(--charcoal); text-decoration: none; }
+  .nav-links { display: flex; align-items: center; gap: 2rem; list-style: none; }
+  .nav-links a { font-size: 13px; color: var(--mid); text-decoration: none; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--charcoal); }
+  .nav-cta { background: var(--accent) !important; color: #fff !important; padding: 8px 20px; border-radius: 100px; font-size: 13px !important; font-weight: 500 !important; }
+  .hero { min-height: 88vh; display: grid; grid-template-columns: 1fr 1fr; align-items: center; max-width: 1100px; margin: 0 auto; padding: 5rem 2rem 4rem; gap: 4rem; }
+  .hero-eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 1.5rem; }
+  .hero-eyebrow::before { content: ''; display: inline-block; width: 24px; height: 1px; background: var(--accent); }
+  .hero h1 { font-family: var(--serif); font-size: clamp(38px, 5vw, 56px); line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 1.5rem; }
+  .hero h1 em { font-style: italic; color: var(--accent); }
+  .hero-desc { font-size: 16px; color: var(--mid); line-height: 1.75; max-width: 420px; margin-bottom: 2.5rem; font-weight: 300; }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .btn-primary { background: var(--charcoal); color: #fff; padding: 14px 28px; border-radius: 100px; font-size: 14px; font-weight: 500; text-decoration: none; transition: background 0.2s; display: inline-block; }
+  .btn-primary:hover { background: var(--accent); }
+  .btn-ghost { color: var(--mid); font-size: 14px; text-decoration: none; display: flex; align-items: center; gap: 6px; }
+  .btn-ghost::after { content: '→'; }
+  .hero-card { background: var(--cream); border-radius: 20px; padding: 2.5rem; border: 1px solid var(--border); }
+  .hero-photos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.25rem; }
+  .hero-photo { border-radius: 16px; overflow: hidden; border: 1px solid var(--border); position: relative; }
+  .hero-photo img { width: 100%; height: 220px; object-fit: cover; display: block; }
+  .hero-photo-label { position: absolute; bottom: 8px; left: 8px; background: rgba(28,28,26,0.75); color: #fff; font-size: 10px; padding: 3px 8px; border-radius: 100px; font-weight: 500; letter-spacing: 0.04em; }
+  .hero-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 1.5rem; }
+  .hero-stat { background: var(--warm-white); border-radius: 12px; padding: 1.25rem; border: 1px solid var(--border); }
+  .hero-stat-num { font-family: var(--serif); font-size: 32px; line-height: 1; margin-bottom: 4px; }
+  .hero-stat-label { font-size: 12px; color: var(--mid); }
+  .hero-badge { background: var(--accent-light); border-radius: 12px; padding: 1rem 1.25rem; display: flex; align-items: center; gap: 12px; }
+  .hero-badge-icon { width: 36px; height: 36px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .hero-badge-icon svg { width: 16px; height: 16px; fill: #fff; }
+  .hero-badge-text { font-size: 13px; color: var(--accent); font-weight: 500; line-height: 1.4; }
+  .trust-bar { background: var(--cream); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 1.25rem 2rem; }
+  .trust-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: center; gap: 3rem; flex-wrap: wrap; }
+  .trust-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--mid); }
+  .trust-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+  .section { max-width: 1100px; margin: 0 auto; padding: 5rem 2rem; }
+  .section-label { font-size: 11px; color: var(--light); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 0.5rem; }
+  .section h2 { font-family: var(--serif); font-size: clamp(28px, 3.5vw, 40px); line-height: 1.15; letter-spacing: -0.02em; max-width: 480px; margin-bottom: 1rem; }
+  .section-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 3rem; gap: 2rem; flex-wrap: wrap; }
+  .section-subtitle { font-size: 15px; color: var(--mid); line-height: 1.7; max-width: 380px; font-weight: 300; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 0 2rem; }
+  .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+  .service-item { background: var(--warm-white); padding: 2rem; transition: background 0.2s; }
+  .service-item:hover { background: var(--cream); }
+  .service-num { font-size: 11px; color: var(--light); font-weight: 500; letter-spacing: 0.08em; margin-bottom: 1rem; }
+  .service-name { font-family: var(--serif); font-size: 20px; margin-bottom: 0.75rem; }
+  .service-desc { font-size: 13px; color: var(--mid); line-height: 1.65; font-weight: 300; }
 
-function closeChat() {
-  document.getElementById('chatOverlay').classList.remove('active');
-  document.getElementById('chatPopup').classList.remove('active');
-  document.getElementById('chatFab').style.display = 'flex';
-  chatOpen = false;
-}
+  /* GALLERY */
+  .gallery-section { background: var(--cream); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 5rem 2rem; }
+  .gallery-inner { max-width: 1100px; margin: 0 auto; }
+  .gallery-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 3rem; flex-wrap: wrap; gap: 1.5rem; }
+  .gallery-title { font-family: var(--serif); font-size: clamp(28px,3.5vw,40px); line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+  .gallery-subtitle { font-size: 15px; color: var(--mid); font-weight: 300; }
+  .gallery-links { display: flex; gap: 12px; flex-wrap: wrap; }
+  .gallery-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 100px; font-size: 13px; font-weight: 500; text-decoration: none; transition: all 0.2s; border: 1px solid var(--border); background: var(--warm-white); color: var(--charcoal); }
+  .gallery-btn:hover { background: var(--charcoal); color: #fff; border-color: var(--charcoal); }
+  .gallery-btn.fb { background: #1877F2; color: #fff; border-color: #1877F2; }
+  .gallery-btn.fb:hover { opacity: 0.85; background: #1877F2; }
+  .gallery-btn svg { width: 14px; height: 14px; fill: currentColor; }
+  .ba-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
+  .ba-pair { border-radius: 16px; overflow: hidden; border: 1px solid var(--border); background: var(--warm-white); }
+  .ba-images { display: grid; grid-template-columns: 1fr 1fr; }
+  .ba-img-wrap { position: relative; overflow: hidden; aspect-ratio: 4/3; }
+  .ba-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s; }
+  .ba-img-wrap:hover img { transform: scale(1.04); }
+  .ba-label { position: absolute; bottom: 8px; left: 8px; background: rgba(28,28,26,0.75); color: #fff; font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 8px; border-radius: 100px; }
+  .ba-caption { padding: 1rem 1.25rem; }
+  .ba-caption h4 { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+  .ba-caption p { font-size: 12px; color: var(--mid); line-height: 1.5; }
+  .photo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .photo-item { border-radius: 12px; overflow: hidden; aspect-ratio: 1; border: 1px solid var(--border); }
+  .photo-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s; }
+  .photo-item:hover img { transform: scale(1.06); }
 
-// ============================================================
-// MESSAGE DISPLAY
-// ============================================================
-function renderMarkdown(text) {
-  return text
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/^#{1,3}\s(.+)$/gm, '<strong>$1</strong>')
-    .replace(/---+/g, '<hr style="border:none;border-top:1px solid #ddd;margin:8px 0;">')
-    .replace(/^\|\s*(.+?)\s*\|\s*(.+?)\s*\|$/gm, (match, col1, col2) => {
-      if (col1.match(/^[-\s]+$/) && col2.match(/^[-\s]+$/)) return ''; // skip separator row
-      return `<div style="display:flex;gap:12px;justify-content:space-between;padding:3px 0;border-bottom:1px solid #eee;"><span>${col1}</span><span><strong>${col2}</strong></span></div>`;
-    })
-    .replace(/^\s*[-•]\s(.+)$/gm, '<div style="padding:2px 0;">• $1</div>')
-    .replace(/\n\n/g, '<br><br>')
-    .replace(/\n/g, '<br>');
-}
+  /* ABOUT */
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+  .about-img { border-radius: 20px; overflow: hidden; aspect-ratio: 3/4; border: 1px solid var(--border); }
+  .about-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .about-text p { font-size: 15px; color: var(--mid); line-height: 1.8; font-weight: 300; margin-bottom: 1rem; }
+  .about-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 2rem; }
+  .about-stat { background: var(--cream); border-radius: 12px; padding: 1.25rem; border: 1px solid var(--border); }
+  .about-stat-num { font-family: var(--serif); font-size: 28px; color: var(--accent); margin-bottom: 4px; }
+  .about-stat-label { font-size: 12px; color: var(--mid); }
 
-function showBotMessage(text) {
-  const msgs = document.getElementById('chatMessages');
-  const msg = document.createElement('div');
-  msg.className = 'msg bot';
-  msg.innerHTML = `<div class="msg-bubble">${renderMarkdown(text)}</div>`;
-  msgs.appendChild(msg);
-  msgs.scrollTop = msgs.scrollHeight;
-}
+  /* PM */
+  .pm-wrapper { background: var(--charcoal); border-radius: 20px; padding: 4rem; display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start; }
+  .pm-left .section-label { color: rgba(255,255,255,0.4); }
+  .pm-left h2 { color: #fff; max-width: 100%; font-family: var(--serif); font-size: clamp(26px,3vw,36px); line-height: 1.15; letter-spacing: -0.02em; }
+  .pm-left p { color: rgba(255,255,255,0.5); font-size: 15px; line-height: 1.7; font-weight: 300; margin-top: 1rem; }
+  .pm-points { list-style: none; display: flex; flex-direction: column; gap: 1rem; }
+  .pm-point { display: flex; gap: 14px; align-items: flex-start; }
+  .pm-check { width: 20px; height: 20px; min-width: 20px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; margin-top: 2px; }
+  .pm-check svg { width: 10px; height: 10px; stroke: #fff; fill: none; stroke-width: 2.5; }
+  .pm-point-text { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.6; font-weight: 300; }
+  .pm-point-text strong { color: #fff; font-weight: 500; }
+  .pm-cta-card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 1.75rem; margin-top: 2rem; }
+  .pm-cta-card p { font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 1rem; }
+  .pm-cta-btn { background: var(--accent); color: #fff; padding: 12px 24px; border-radius: 100px; font-size: 13px; font-weight: 500; text-decoration: none; display: inline-block; }
 
-function showUserMessage(text) {
-  const msgs = document.getElementById('chatMessages');
-  const msg = document.createElement('div');
-  msg.className = 'msg user';
-  msg.innerHTML = `<div class="msg-bubble">${text}</div>`;
-  msgs.appendChild(msg);
-  msgs.scrollTop = msgs.scrollHeight;
-}
+  /* PROCESS */
+  .process-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; position: relative; }
+  .process-grid::before { content: ''; position: absolute; top: 28px; left: 40px; right: 40px; height: 1px; background: var(--border); z-index: 0; }
+  .process-step { position: relative; z-index: 1; }
+  .process-num { width: 56px; height: 56px; border-radius: 50%; background: var(--warm-white); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-size: 20px; margin-bottom: 1.25rem; }
+  .process-step:first-child .process-num { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .process-step-title { font-size: 15px; font-weight: 500; margin-bottom: 0.5rem; }
+  .process-step-desc { font-size: 13px; color: var(--mid); line-height: 1.65; font-weight: 300; }
 
-function showTyping() {
-  const msgs = document.getElementById('chatMessages');
-  const existing = document.getElementById('typingIndicator');
-  if (existing) existing.remove();
-  const typing = document.createElement('div');
-  typing.className = 'msg bot';
-  typing.id = 'typingIndicator';
-  typing.innerHTML = `<div class="typing"><span></span><span></span><span></span></div>`;
-  msgs.appendChild(typing);
-  msgs.scrollTop = msgs.scrollHeight;
-}
+  /* CTA */
+  .cta-section { background: var(--cream); border-top: 1px solid var(--border); padding: 5rem 2rem; text-align: center; }
+  .cta-section h2 { font-family: var(--serif); font-size: clamp(32px, 4vw, 48px); letter-spacing: -0.02em; margin-bottom: 1rem; }
+  .cta-section > p { font-size: 16px; color: var(--mid); margin-bottom: 3rem; font-weight: 300; }
+  .contact-row { display: inline-flex; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; flex-wrap: wrap; margin-bottom: 3rem; }
+  .contact-cell { background: var(--warm-white); padding: 1.5rem 2rem; text-align: left; min-width: 180px; }
+  .contact-cell-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--light); margin-bottom: 6px; }
+  .contact-cell-value { font-size: 15px; font-weight: 500; color: var(--charcoal); text-decoration: none; }
+  .contact-cell-value:hover { color: var(--accent); }
 
-function removeTyping() {
-  const t = document.getElementById('typingIndicator');
-  if (t) t.remove();
-}
+  /* CONTACT FORM */
+  .contact-form-wrap { max-width: 560px; margin: 0 auto; background: var(--warm-white); border: 1px solid var(--border); border-radius: 20px; padding: 2.5rem; text-align: left; }
+  .contact-form-title { font-family: var(--serif); font-size: 22px; margin-bottom: 0.25rem; }
+  .contact-form-sub { font-size: 13px; color: var(--mid); margin-bottom: 1.75rem; font-weight: 300; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+  .form-group label { font-size: 12px; font-weight: 500; color: var(--charcoal); letter-spacing: 0.02em; }
+  .form-group input, .form-group select, .form-group textarea {
+    border: 1px solid var(--border); border-radius: 10px; padding: 11px 14px;
+    font-size: 14px; font-family: var(--sans); background: var(--cream);
+    color: var(--charcoal); outline: none; transition: border-color 0.2s; width: 100%;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent); }
+  .form-group textarea { resize: vertical; min-height: 90px; line-height: 1.5; }
+  .form-group select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B6860' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+  .consent-row { display: flex; gap: 10px; align-items: flex-start; margin: 1.25rem 0; padding: 1rem; background: var(--accent-light); border-radius: 10px; border: 1px solid rgba(42,92,63,0.15); }
+  .consent-row input[type="checkbox"] { margin-top: 2px; accent-color: var(--accent); width: 16px; height: 16px; flex-shrink: 0; cursor: pointer; }
+  .consent-row label { font-size: 12px; color: var(--mid); line-height: 1.55; cursor: pointer; }
+  .consent-row label strong { color: var(--charcoal); font-weight: 500; }
+  .consent-row label a { color: var(--accent); text-decoration: none; }
+  .consent-row label a:hover { text-decoration: underline; }
+  .form-submit { width: 100%; background: var(--accent); color: #fff; border: none; border-radius: 100px; padding: 14px 28px; font-size: 14px; font-weight: 500; font-family: var(--sans); cursor: pointer; transition: opacity 0.2s; margin-top: 0.5rem; }
+  .form-submit:hover { opacity: 0.88; }
+  .form-submit:disabled { opacity: 0.55; cursor: not-allowed; }
+  .form-success { display: none; text-align: center; padding: 2rem 1rem; }
+  .form-success-icon { width: 52px; height: 52px; background: var(--accent-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
+  .form-success-icon svg { width: 22px; height: 22px; stroke: var(--accent); fill: none; stroke-width: 2.5; }
+  .form-success h3 { font-family: var(--serif); font-size: 22px; margin-bottom: 0.5rem; }
+  .form-success p { font-size: 14px; color: var(--mid); font-weight: 300; }
+  @media (max-width: 768px) {
+    .form-row { grid-template-columns: 1fr; }
+    .contact-form-wrap { padding: 1.75rem 1.25rem; }
+  }
+  footer { padding: 1.5rem 2rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; max-width: 1100px; margin: 0 auto; }
+  footer p { font-size: 12px; color: var(--light); }
 
-// ============================================================
-// INPUT AREA
-// ============================================================
-function showQuickButtons(options) {
-  const area = document.getElementById('chatInputArea');
-  const allOptions = options.includes('📧 Email Us') ? options : [...options, '📧 Email Us'];
-  const buttonsHtml = allOptions.map(o =>
-    `<button class="chat-option${o === '📧 Email Us' ? ' chat-option-persistent' : ''}" 
-     onclick="handleQuickButton('${o.replace(/'/g, "\\'")}')">${o}</button>`
-  ).join('');
-  area.innerHTML = `
-    <div class="chat-options">${buttonsHtml}</div>
-    <div class="chat-input-wrap" style="margin-top:8px;">
-      <input class="chat-input" id="chatInput" type="text" 
-             placeholder="Or type your message..." autocomplete="off" 
-             onkeydown="if(event.key==='Enter') sendMessage()">
-      <button class="chat-send" onclick="sendMessage()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="22" y1="2" x2="11" y2="13"/>
-          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-        </svg>
-      </button>
-    </div>`;
-  setTimeout(() => { const i = document.getElementById('chatInput'); if(i) i.focus(); }, 100);
-}
+  @media (max-width: 768px) {
+    .hero { grid-template-columns: 1fr; gap: 2.5rem; min-height: auto; padding: 3rem 1.5rem; }
+    .hero-visual { order: -1; }
+    .services-grid { grid-template-columns: 1fr; }
+    .pm-wrapper { grid-template-columns: 1fr; padding: 2.5rem 1.75rem; gap: 2.5rem; }
+    .process-grid { grid-template-columns: 1fr 1fr; }
+    .process-grid::before { display: none; }
+    .nav-links { display: none; }
+    .ba-grid { grid-template-columns: 1fr; }
+    .about-grid { grid-template-columns: 1fr; }
+    .photo-grid { grid-template-columns: repeat(2, 1fr); }
+    .section { padding: 3.5rem 1.5rem; }
+    .gallery-section { padding: 3.5rem 1.5rem; }
+    .contact-row { width: 100%; }
+    .contact-cell { flex: 1; }
+    .gallery-header { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
 
-function showTextInput() {
-  const area = document.getElementById('chatInputArea');
-  area.innerHTML = `
-    <div class="chat-options">
-      <button class="chat-option chat-option-persistent" 
-              onclick="handleQuickButton('📧 Email Us')">📧 Email Us</button>
+<nav>
+  <a href="#" class="nav-brand">Specialty Home Painting</a>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#gallery">Gallery</a></li>
+    <li><a href="#process">Process</a></li>
+    <li><a href="#property-managers">Property Managers</a></li>
+    <li><a href="#contact" class="nav-cta">Get a free estimate</a></li>
+  </ul>
+</nav>
+
+<section>
+  <div class="hero">
+    <div class="hero-text">
+      <div class="hero-eyebrow">Orlando, FL — Repair & Refinish</div>
+      <h1>Your home,<br><em>restored</em> to its<br>best finish.</h1>
+      <p class="hero-desc">We fix cracks, patch drywall, restore worn doors, and deliver a flawless enamel finish — repair and refinish in a single engagement.</p>
+      <div class="hero-actions">
+        <a href="tel:9045147016" class="btn-primary">Call or text (904) 514-7016</a>
+        <a href="mailto:issam@specialtyhomepainting.com" class="btn-ghost">Send an email</a>
+      </div>
     </div>
-    <div class="chat-input-wrap" style="margin-top:8px;">
-      <input class="chat-input" id="chatInput" type="text" 
-             placeholder="Type your message..." autocomplete="off"
-             onkeydown="if(event.key==='Enter') sendMessage()">
-      <button class="chat-send" onclick="sendMessage()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="22" y1="2" x2="11" y2="13"/>
-          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-        </svg>
-      </button>
-    </div>`;
-  setTimeout(() => { const i = document.getElementById('chatInput'); if(i) i.focus(); }, 100);
-}
-
-function showQuoteButtons() {
-  const area = document.getElementById('chatInputArea');
-  area.innerHTML = `
-    <div class="chat-options">
-      <button class="chat-option chat-option-quote" onclick="viewQuote()">📄 View Quote</button>
-      <button class="chat-option" onclick="handleQuickButton('Email me the quote')">📧 Email Quote</button>
-      <button class="chat-option chat-option-persistent" onclick="handleQuickButton('📧 Email Us')">📧 Email Us</button>
-    </div>
-    <div class="chat-input-wrap" style="margin-top:8px;">
-      <input class="chat-input" id="chatInput" type="text" 
-             placeholder="Type your message..." autocomplete="off"
-             onkeydown="if(event.key==='Enter') sendMessage()">
-      <button class="chat-send" onclick="sendMessage()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="22" y1="2" x2="11" y2="13"/>
-          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-        </svg>
-      </button>
-    </div>`;
-  setTimeout(() => { const i = document.getElementById('chatInput'); if(i) i.focus(); }, 100);
-}
-
-// ============================================================
-// HANDLE USER INPUT
-// ============================================================
-function handleQuickButton(value) {
-  const map = {
-    '🖌️ Our Services': 'Tell me about your services',
-    '💰 Get an Estimate': 'I would like to get an estimate',
-    '📧 Email Us': 'I would like to send an email',
-    '📞 Call Us': 'How can I call you?'
-  };
-  const text = map[value] || value;
-  processUserMessage(text);
-}
-
-function sendMessage() {
-  const input = document.getElementById('chatInput');
-  if (!input || !input.value.trim()) return;
-  const text = input.value.trim();
-  input.value = '';
-  processUserMessage(text);
-}
-
-// ============================================================
-// MAIN MESSAGE PROCESSOR
-// ============================================================
-async function processUserMessage(text) {
-  showUserMessage(text);
-  showTextInput();
-
-  // Detect email address typed by user
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (emailRegex.test(text)) {
-    customerEmail = text;
-    showTyping();
-    setTimeout(() => {
-      removeTyping();
-      sendChatSummary(text);
-    }, 800);
-    return;
-  }
-
-  // Check if user wants to view/download quote
-  if (text.toLowerCase().includes('view quote') || text.toLowerCase().includes('download')) {
-    if (currentQuote) {
-      generateAndShowPDF();
-    } else {
-      showBotMessage("I don't have a quote ready yet. Let me gather a few more details first.");
-    }
-    return;
-  }
-
-  // Add to history
-  chatHistory.push({ role: 'user', content: text });
-
-  // Call proxy
-  showTyping();
-  try {
-    const params = new URLSearchParams({
-      message: text,
-      history: encodeURIComponent(JSON.stringify(chatHistory.slice(-10)))
-    });
-
-    const response = await fetch(PROXY_URL + '?' + params.toString());
-    const data = await response.json();
-    removeTyping();
-
-    if (data.success && data.reply) {
-      await handleReply(data.reply);
-    } else {
-      showBotMessage("Sorry, I'm having trouble connecting. Please call or text Issam directly at (904) 514-7016.");
-      showTextInput();
-    }
-  } catch (err) {
-    removeTyping();
-    console.error('Proxy error:', err);
-    showBotMessage("Sorry, I'm having trouble connecting. Please call or text Issam directly at (904) 514-7016.");
-    showTextInput();
-  }
-}
-
-// ============================================================
-// HANDLE CLAUDE REPLY — text or action JSON
-// ============================================================
-async function handleReply(reply) {
-  // Try to parse as action JSON
-  try {
-    const trimmed = reply.trim();
-    if (trimmed.startsWith('{')) {
-      const action = JSON.parse(trimmed);
-      if (action.action) {
-        await handleAction(action);
-        return;
-      }
-    }
-  } catch(e) {
-    // Not JSON — treat as regular chat reply
-  }
-
-  // Extract buttons if present
-  const buttonMatch = reply.match(/\[BUTTONS:\s*([^\]]+)\]/);
-  const cleanReply = reply.replace(/\[BUTTONS:[^\]]+\]/g, '').trim();
-
-  // Check if reply contains an estimate — show quote buttons
-  const hasEstimate = reply.includes('Total estimate') || 
-                      reply.includes('total estimate') ||
-                      reply.includes('Total:') ||
-                      (reply.includes('$') && reply.includes('estimate')) ||
-                      (reply.includes('$') && reply.includes('total'));
-
-  chatHistory.push({ role: 'assistant', content: cleanReply });
-  showBotMessage(cleanReply);
-
-  // Build a quote from chat text if estimate detected but no action
-  if (hasEstimate && !currentQuote) {
-    // Try to extract dollar amounts from the reply
-    const items = [];
-    const lines = cleanReply.split('\n');
-    let totalLow = 0;
-    let totalHigh = 0;
-
-    lines.forEach(line => {
-      // Match lines with dollar amounts like "Bedroom (small, good) | $150–$180"
-      const match = line.match(/([^|]+)\|\s*\$(\d+)[–-]\$?(\d+)/);
-      if (match && !line.toLowerCase().includes('total')) {
-        const desc = match[1].replace(/\*\*/g, '').trim();
-        const low = parseInt(match[2]);
-        const high = parseInt(match[3]);
-        items.push({ description: desc, low, high });
-        totalLow += low;
-        totalHigh += high;
-      }
-      // Match total line
-      const totalMatch = line.match(/total[^|]*\|\s*\*?\*?\$(\d+)[–-]\$?(\d+)/i);
-      if (totalMatch) {
-        totalLow = parseInt(totalMatch[1]);
-        totalHigh = parseInt(totalMatch[2]);
-      }
-    });
-
-    currentQuote = {
-      items: items.length > 0 ? items : [{ description: 'See estimate above', low: totalLow, high: totalHigh }],
-      total_low: totalLow,
-      total_high: totalHigh,
-      summary: cleanReply
-    };
-  }
-
-  if (buttonMatch) {
-    const buttons = buttonMatch[1].split('|').map(b => b.trim());
-    if (hasEstimate) {
-      showQuoteButtons();
-    } else {
-      showQuickButtons(buttons);
-    }
-  } else if (hasEstimate) {
-    showQuoteButtons();
-  } else {
-    showTextInput();
-  }
-}
-
-// ============================================================
-// ACTION HANDLER — deterministic function dispatcher
-// ============================================================
-async function handleAction(action) {
-  console.log('Action received:', action);
-
-  switch(action.action) {
-
-    case 'store_quote':
-      currentQuote = action.data;
-      if (action.data.name) customerName = action.data.name;
-      if (action.data.email) customerEmail = action.data.email;
-      // Show the estimate as a message
-      showBotMessage(action.data.summary || 'Here is your estimate!');
-      chatHistory.push({ role: 'assistant', content: action.data.summary || 'Here is your estimate!' });
-      // Ask preference
-      setTimeout(() => {
-        showBotMessage("Would you like to download the quote as a PDF, or would you prefer I email it to you?");
-        showQuoteButtons();
-      }, 500);
-      break;
-
-    case 'generate_pdf':
-      currentQuote = action.data || currentQuote;
-      generateAndShowPDF();
-      showBotMessage("Here's your quote! You can download it or I can email it to you. 📄");
-      chatHistory.push({ role: 'assistant', content: "Here's your quote! You can download it or I can email it to you." });
-      showQuoteButtons();
-      break;
-
-    case 'email_quote':
-      const emailTarget = action.data?.email || customerEmail;
-      if (!emailTarget) {
-        showBotMessage("What's your email address? I'll send the quote right over.");
-        showTextInput();
-      } else {
-        customerEmail = emailTarget;
-        generateAndEmailPDF(emailTarget);
-        showBotMessage(`📧 Quote sent to ${emailTarget}! Issam will follow up shortly.`);
-        chatHistory.push({ role: 'assistant', content: `Quote sent to ${emailTarget}!` });
-        showTextInput();
-      }
-      break;
-
-    case 'send_email_customer':
-      const custEmail = action.data?.email || customerEmail;
-      if (custEmail) {
-        sendEmailToCustomer(custEmail, action.data?.subject, action.data?.body);
-        showBotMessage(`✅ Email sent to ${custEmail}! Issam will follow up within 15 minutes.`);
-      } else {
-        showBotMessage("What's your email address so I can send that over?");
-      }
-      showTextInput();
-      break;
-
-    case 'send_email_issam':
-      sendEmailToIssam(action.data?.subject, action.data?.body);
-      showBotMessage("✅ Message sent to Issam! He'll be in touch shortly.");
-      chatHistory.push({ role: 'assistant', content: "Message sent to Issam!" });
-      showTextInput();
-      break;
-
-    case 'collect_email':
-      showBotMessage(action.data?.message || "What's your email address?");
-      showTextInput();
-      break;
-
-    default:
-      console.log('Unknown action:', action.action);
-      showTextInput();
-  }
-}
-
-// ============================================================
-// PDF GENERATION — using jsPDF
-// ============================================================
-function generateAndShowPDF() {
-  if (!currentQuote) return;
-  const pdfDataUrl = buildPDF();
-  showPDFModal(pdfDataUrl);
-}
-
-function viewQuote() {
-  if (!currentQuote) {
-    showBotMessage("Let me generate your quote first. One moment...");
-    generateAndShowPDF();
-    return;
-  }
-  generateAndShowPDF();
-}
-
-function buildPDF() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  const green = [42, 92, 63];
-  const charcoal = [28, 28, 26];
-
-  // Header background
-  doc.setFillColor(...green);
-  doc.rect(0, 0, 210, 40, 'F');
-
-  // Company name
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(22);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Specialty Home Painting', 20, 18);
-
-  // Tagline
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Door Restoration · Drywall Repair · Interior Painting · Orlando, FL', 20, 26);
-  doc.text('(904) 514-7016  |  issam@specialtyhomepainting.com  |  specialtyhomepainting.com', 20, 33);
-
-  // Quote title + date
-  doc.setTextColor(...charcoal);
-  doc.setFontSize(16);
-  doc.setFont('helvetica', 'bold');
-  doc.text('ESTIMATE', 20, 55);
-
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(100, 100, 100);
-  const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  doc.text(`Date: ${today}`, 20, 63);
-  doc.text(`Quote #: SHP-${Date.now().toString().slice(-6)}`, 20, 69);
-
-  // Customer info
-  if (customerName || customerEmail) {
-    doc.setTextColor(...charcoal);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Prepared for:', 120, 55);
-    doc.setFont('helvetica', 'normal');
-    if (customerName) doc.text(customerName, 120, 63);
-    if (customerEmail) doc.text(customerEmail, 120, 69);
-  }
-
-  // Divider
-  doc.setDrawColor(...green);
-  doc.setLineWidth(0.5);
-  doc.line(20, 75, 190, 75);
-
-  // Estimate content — render from chat history
-  const estimateText = getEstimateText();
-  const decodedText = decodeURIComponent(estimateText).replace(/%/g, '');
-  doc.setTextColor(...charcoal);
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-
-  const lines = doc.splitTextToSize(decodedText, 170);
-  let y = 85;
-
-  lines.forEach(line => {
-    if (y > 255) {
-      doc.addPage();
-      y = 20;
-    }
-
-    // Style headers/totals differently
-    const isBold = line.match(/^(total|estimate|item)/i) ||
-                   line.includes('Total') ||
-                   line.startsWith('•');
-
-    if (isBold) {
-      doc.setFont('helvetica', 'bold');
-    } else {
-      doc.setFont('helvetica', 'normal');
-    }
-
-    // Indent bullet points
-    const x = line.startsWith('•') ? 25 : 20;
-    doc.text(line.replace(/^\*\*|\*\*$/g, '').replace(/^\*|\*$/g, ''), x, y);
-    y += 7;
-  });
-
-  // Notes
-  y += 10;
-  doc.setFont('helvetica', 'italic');
-  doc.setFontSize(9);
-  doc.setTextColor(120, 120, 120);
-  doc.text('* This is a ballpark estimate. Final price confirmed after free in-person visit.', 20, y);
-  doc.text('* Minor drywall patches included in room price. Larger repairs quoted separately.', 20, y + 6);
-
-  // Footer
-  doc.setFillColor(...green);
-  doc.rect(0, 275, 210, 22, 'F');
-  doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.text('Thank you for considering Specialty Home Painting!', 105, 283, { align: 'center' });
-  doc.text('We repair first, then refinish — no shortcuts.', 105, 289, { align: 'center' });
-
-  return doc.output('datauristring');
-}
-
-// Extract estimate text from chat history or currentQuote
-function getEstimateText() {
-  // Use stored quote summary if available
-  if (currentQuote && currentQuote.summary) {
-    return stripMarkdown(currentQuote.summary);
-  }
-
-  // Otherwise find last bot message containing dollar amounts
-  const estimateMessages = chatHistory
-    .filter(m => m.role === 'assistant' && m.content.includes('$'))
-    .map(m => m.content);
-
-  if (estimateMessages.length > 0) {
-    return stripMarkdown(estimateMessages[estimateMessages.length - 1]);
-  }
-
-  return 'Please see your chat conversation for estimate details.';
-}
-
-// Strip markdown for PDF plain text rendering
-function stripMarkdown(text) {
-  return text
-    .replace(/\*\*/g, '')
-    .replace(/\*/g, '')
-    .replace(/#{1,6}\s/g, '')
-    .replace(/---+/g, '─────────────────')
-    .replace(/\|/g, '  ')
-    .replace(/^\s*[-]\s/gm, '• ')
-    .trim();
-}
-
-// ============================================================
-// PDF MODAL
-// ============================================================
-function showPDFModal(pdfDataUrl) {
-  // Remove existing modal
-  const existing = document.getElementById('pdfModal');
-  if (existing) existing.remove();
-
-  const modal = document.createElement('div');
-  modal.id = 'pdfModal';
-  modal.innerHTML = `
-    <div class="pdf-modal-overlay" onclick="closePDFModal()"></div>
-    <div class="pdf-modal-content">
-      <div class="pdf-modal-header">
-        <span class="pdf-modal-title">📄 Your Estimate</span>
-        <div class="pdf-modal-actions">
-          <button class="pdf-btn-download" onclick="downloadPDF()">⬇️ Download PDF</button>
-          <button class="pdf-btn-email" onclick="promptEmailPDF()">📧 Email PDF</button>
-          <button class="pdf-btn-close" onclick="closePDFModal()">✕</button>
+    <div class="hero-visual">
+      <div class="hero-card">
+        <div class="hero-photos">
+          <div class="hero-photo">
+            <img src="hallway-after-cropped.jpg" alt="Hallway transformation — Specialty Home Painting Orlando">
+            <span class="hero-photo-label">✓ Walls & trim</span>
+          </div>
+          <div class="hero-photo">
+            <img src="french-door-cropped.jpg" alt="French door restoration — Specialty Home Painting Orlando">
+            <span class="hero-photo-label">✓ Door finish</span>
+          </div>
+        </div>
+        <div class="hero-stat-grid">
+          <div class="hero-stat"><div class="hero-stat-num">20+</div><div class="hero-stat-label">Years of experience</div></div>
+          <div class="hero-stat"><div class="hero-stat-num">5★</div><div class="hero-stat-label">Rated on Thumbtack</div></div>
+          <div class="hero-stat"><div class="hero-stat-num">1</div><div class="hero-stat-label">Vendor, all trades</div></div>
+          <div class="hero-stat"><div class="hero-stat-num">0</div><div class="hero-stat-label">Painted-over problems</div></div>
+        </div>
+        <div class="hero-badge">
+          <div class="hero-badge-icon"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>
+          <div class="hero-badge-text">Workshop-grade door finishing using horizontal suspension technique</div>
         </div>
       </div>
-      <iframe id="pdfFrame" src="${pdfDataUrl}" class="pdf-frame"></iframe>
-    </div>`;
-  document.body.appendChild(modal);
+    </div>
+  </div>
+</section>
 
-  // Store URL for download
-  window._currentPdfUrl = pdfDataUrl;
-}
+<div class="trust-bar">
+  <div class="trust-inner">
+    <div class="trust-item"><div class="trust-dot"></div>Door restoration & refinishing</div>
+    <div class="trust-item"><div class="trust-dot"></div>Drywall repair — patch to full section</div>
+    <div class="trust-item"><div class="trust-dot"></div>Trim, baseboard & ceiling painting</div>
+    <div class="trust-item"><div class="trust-dot"></div>Pre-sale & tenant turnover ready</div>
+    <div class="trust-item"><div class="trust-dot"></div>Greater Orlando service area</div>
+  </div>
+</div>
 
-function closePDFModal() {
-  const modal = document.getElementById('pdfModal');
-  if (modal) modal.remove();
-}
+<div class="section" id="services">
+  <div class="section-header">
+    <div>
+      <div class="section-label">What we do</div>
+      <h2>Specialized repair and refinish services</h2>
+    </div>
+    <p class="section-subtitle">Not general painting. Every job starts with fixing what's broken before any paint is applied.</p>
+  </div>
+  <div class="services-grid">
+    <div class="service-item"><div class="service-num">01</div><div class="service-name">Door restoration</div><p class="service-desc">Crack filling, hole repair, height shaving for new flooring, wood putty, and a factory-smooth enamel finish using our horizontal suspension technique.</p></div>
+    <div class="service-item"><div class="service-num">02</div><div class="service-name">Drywall repair</div><p class="service-desc">From small dents and dings to full section replacement. Seamless repair — no visible seams or edges after paint.</p></div>
+    <div class="service-item"><div class="service-num">03</div><div class="service-name">Trim & baseboard</div><p class="service-desc">Clean, precise enamel finish on all interior trim, baseboards, and door casings. The detail work that makes a room look truly finished.</p></div>
+    <div class="service-item"><div class="service-num">04</div><div class="service-name">Ceiling painting</div><p class="service-desc">Clean flat finish ceilings — the detail most painters rush through. We take the time to do it right.</p></div>
+    <div class="service-item"><div class="service-num">05</div><div class="service-name">Interior walls</div><p class="service-desc">Single rooms or full interiors. Surface prep and any necessary repairs are always included before paint goes on the wall.</p></div>
+    <div class="service-item"><div class="service-num">06</div><div class="service-name">Pre-sale prep</div><p class="service-desc">Get your home market-ready fast. Doors, walls, trim, and ceilings handled in a single engagement — one vendor, one visit.</p></div>
+  </div>
+</div>
 
-function downloadPDF() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  // Rebuild and download
-  const pdfUrl = buildPDF();
-  const link = document.createElement('a');
-  link.href = pdfUrl;
-  link.download = `Specialty-Home-Painting-Estimate-${Date.now()}.pdf`;
-  link.click();
-}
+<hr class="divider">
 
-function promptEmailPDF() {
-  closePDFModal();
-  if (customerEmail) {
-    generateAndEmailPDF(customerEmail);
-    showBotMessage(`📧 Quote emailed to ${customerEmail}!`);
-  } else {
-    showBotMessage("What's your email address? I'll send the PDF quote right over.");
-    showTextInput();
-    window._pendingEmailPDF = true;
+<div class="gallery-section" id="gallery">
+  <div class="gallery-inner">
+    <div class="gallery-header">
+      <div>
+        <div class="section-label">Our work</div>
+        <div class="gallery-title">Before & after results</div>
+        <p class="gallery-subtitle">Real jobs, real Orlando homes. Every project starts with repair first.</p>
+      </div>
+      <div class="gallery-links">
+        <a href="https://photos.app.goo.gl/4h3yW1NPqJgWPt8QA" target="_blank" class="gallery-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          View full portfolio
+        </a>
+        <a href="https://www.facebook.com/profile.php?id=61572034713934" target="_blank" class="gallery-btn fb">
+          <svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+          Follow on Facebook
+        </a>
+      </div>
+    </div>
+
+    <div class="ba-grid">
+      <div class="ba-pair">
+        <div class="ba-images">
+          <div class="ba-img-wrap"><img src="hallway-before.jpg" alt="Hallway before" loading="lazy"><span class="ba-label">Before</span></div>
+          <div class="ba-img-wrap"><img src="hallway-after.jpg" alt="Hallway after" loading="lazy"><span class="ba-label">After</span></div>
+        </div>
+        <div class="ba-caption"><h4>Full hallway repaint & repair</h4><p>Drywall patches, fresh paint, crisp trim — complete transformation</p></div>
+      </div>
+      <div class="ba-pair">
+        <div class="ba-images">
+          <div class="ba-img-wrap"><img src="french door before.png" alt="French door before" loading="lazy"><span class="ba-label">Before</span></div>
+          <div class="ba-img-wrap"><img src="french door after.png" alt="French door after" loading="lazy"><span class="ba-label">After</span></div>
+        </div>
+        <div class="ba-caption"><h4>French door restoration</h4><p>Full enamel refinish using horizontal suspension — factory-smooth result</p></div>
+      </div>
+    </div>
+
+    <div class="ba-grid">
+      <div class="ba-pair">
+        <div class="ba-images">
+          <div class="ba-img-wrap"><img src="door before.png" alt="Door before" loading="lazy"><span class="ba-label">Before</span></div>
+          <div class="ba-img-wrap"><img src="door after.png" alt="Door after" loading="lazy"><span class="ba-label">After</span></div>
+        </div>
+        <div class="ba-caption"><h4>Interior door refinishing</h4><p>Crack repair, wood putty, and flawless enamel finish</p></div>
+      </div>
+      <div class="ba-pair">
+        <div class="ba-images">
+          <div class="ba-img-wrap"><img src="shelves painting before.png" alt="Shelves before" loading="lazy"><span class="ba-label">Before</span></div>
+          <div class="ba-img-wrap"><img src="shelves painting after.png" alt="Shelves after" loading="lazy"><span class="ba-label">After</span></div>
+        </div>
+        <div class="ba-caption"><h4>Built-in shelf painting</h4><p>Precision enamel finish on built-in shelving and trim</p></div>
+      </div>
+    </div>
+
+    <div class="ba-grid">
+      <div class="ba-pair">
+        <div class="ba-images">
+          <div class="ba-img-wrap"><img src="drywall-1-before.jpg" alt="Drywall before repair" loading="lazy"><span class="ba-label">Before</span></div>
+          <div class="ba-img-wrap"><img src="drywall-1-after.png" alt="Drywall after repair" loading="lazy"><span class="ba-label">After</span></div>
+        </div>
+        <div class="ba-caption"><h4>Drywall section repair</h4><p>Full section cut-out, new drywall installed, seamless finish — no visible seams</p></div>
+      </div>
+    </div>
+
+    <div class="photo-grid">
+      <div class="photo-item"><img src="door painting 1.jpg" alt="Door painting process" loading="lazy"></div>
+      <div class="photo-item"><img src="door painting 2.jpg" alt="Door on suspension rig" loading="lazy"></div>
+      <div class="photo-item"><img src="room painting 1.jpg" alt="Room painting" loading="lazy"></div>
+      <div class="photo-item"><img src="room painting 1.jpg" alt="Room painting" loading="lazy"></div>
+      <div class="photo-item"><img src="bathroom painting 2.jpg" alt="Bathroom after" loading="lazy"></div>
+      <div class="photo-item"><img src="livingroom.jpg" alt="Living room" loading="lazy"></div>
+      <div class="photo-item"><img src="baseboards.jpg" alt="Baseboard painting" loading="lazy"></div>
+      <div class="photo-item"><img src="prep1.jpg" alt="Surface preparation" loading="lazy"></div>
+    </div>
+  </div>
+</div>
+
+<div class="section" id="about">
+  <div class="about-grid">
+    <div class="about-img">
+      <img src="door painting 1.jpg" alt="Issam at work — Specialty Home Painting Orlando">
+    </div>
+    <div class="about-text">
+      <div class="section-label">About</div>
+      <h2>20+ years of hands-on experience</h2>
+      <p>I'm Issam, and I've been working with paint, drywall, and wood for over two decades. What separates my work from the average painter is simple — I fix problems before I paint over them.</p>
+      <p>Every job gets the same workshop-grade attention to detail, whether it's a single door or a full unit turnover. I show up on time, work clean, and don't leave until it's right.</p>
+      <p>Based in Orlando, FL — serving homeowners, property managers, and real estate agents across the greater Orlando area.</p>
+      <div class="about-stats">
+        <div class="about-stat"><div class="about-stat-num">20+</div><div class="about-stat-label">Years experience</div></div>
+        <div class="about-stat"><div class="about-stat-num">5★</div><div class="about-stat-label">Thumbtack rating</div></div>
+        <div class="about-stat"><div class="about-stat-num">1</div><div class="about-stat-label">Vendor for all trades</div></div>
+        <div class="about-stat"><div class="about-stat-num">0</div><div class="about-stat-label">Painted-over problems</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="section" id="property-managers">
+  <div class="pm-wrapper">
+    <div class="pm-left">
+      <div class="section-label">Property managers & real estate agents</div>
+      <h2>Turnover-ready results, on your schedule.</h2>
+      <p>We understand tenant turnover has a timeline. You need one contractor who shows up, works clean, and delivers move-in ready results.</p>
+    </div>
+    <div class="pm-right">
+      <ul class="pm-points">
+        <li class="pm-point"><div class="pm-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><span class="pm-point-text"><strong>Doors, drywall, trim, and ceilings</strong> handled in a single engagement — no coordinating multiple vendors</span></li>
+        <li class="pm-point"><div class="pm-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><span class="pm-point-text"><strong>Repair and refinish</strong> — we fix damage before painting over it, so problems don't come back</span></li>
+        <li class="pm-point"><div class="pm-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><span class="pm-point-text"><strong>On-schedule and reliable</strong> — we communicate throughout the job and don't disappear mid-project</span></li>
+        <li class="pm-point"><div class="pm-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><span class="pm-point-text"><strong>Clean worksite</strong> — drop cloths, tape, and full cleanup included on every job</span></li>
+        <li class="pm-point"><div class="pm-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><span class="pm-point-text"><strong>Orlando-area rental properties</strong>, HOAs, and pre-listing prep — we know the local market</span></li>
+      </ul>
+      <div class="pm-cta-card">
+        <p>Recurring property management relationships welcome. Let's talk about your portfolio.</p>
+        <a href="tel:9045147016" class="pm-cta-btn">Call (904) 514-7016</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" id="process">
+  <div class="section-header">
+    <div>
+      <div class="section-label">How it works</div>
+      <h2>Simple, transparent process</h2>
+    </div>
+    <p class="section-subtitle">No surprises. We assess, repair, finish, and hand off — with you involved at every step.</p>
+  </div>
+  <div class="process-grid">
+    <div class="process-step"><div class="process-num">1</div><div class="process-step-title">Free estimate</div><p class="process-step-desc">Call or text us. We visit the site, assess what needs repair vs. what just needs paint, and give you a clear written quote.</p></div>
+    <div class="process-step"><div class="process-num">2</div><div class="process-step-title">Repair first</div><p class="process-step-desc">Cracks, holes, drywall damage, and door issues are fixed before any painting begins. We never paint over problems.</p></div>
+    <div class="process-step"><div class="process-num">3</div><div class="process-step-title">Workshop finish</div><p class="process-step-desc">Doors are removed, suspended horizontally, and painted with high-durability enamel for a drip-free, factory-smooth result.</p></div>
+    <div class="process-step"><div class="process-num">4</div><div class="process-step-title">Clean handoff</div><p class="process-step-desc">Full cleanup, hardware reinstalled, and a walkthrough with you before we consider the job complete.</p></div>
+  </div>
+</div>
+
+<div class="cta-section" id="contact">
+  <h2>Ready for a free estimate?</h2>
+  <p>Call, text, or fill out the form — we respond within 15 minutes. Serving Orlando and surrounding areas.</p>
+  <div class="contact-row">
+    <div class="contact-cell"><div class="contact-cell-label">Phone & text</div><a href="tel:9045147016" class="contact-cell-value">(904) 514-7016</a></div>
+    <div class="contact-cell"><div class="contact-cell-label">Email</div><a href="mailto:issam@specialtyhomepainting.com" class="contact-cell-value">issam@specialtyhomepainting.com</a></div>
+    <div class="contact-cell"><div class="contact-cell-label">Service area</div><span class="contact-cell-value">Greater Orlando, FL</span></div>
+  </div>
+
+  <div class="contact-form-wrap">
+    <div id="contactFormBody">
+      <div class="contact-form-title">Send us a message</div>
+      <p class="contact-form-sub">Tell us about your project and we'll get back to you fast.</p>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="cf-name">Your name</label>
+          <input type="text" id="cf-name" placeholder="Jane Smith" autocomplete="name">
+        </div>
+        <div class="form-group">
+          <label for="cf-phone">Phone number</label>
+          <input type="tel" id="cf-phone" placeholder="(407) 555-0100" autocomplete="tel">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="cf-email">Email address</label>
+        <input type="email" id="cf-email" placeholder="jane@email.com" autocomplete="email">
+      </div>
+
+      <div class="form-group">
+        <label for="cf-service">What service are you looking for?</label>
+        <select id="cf-service">
+          <option value="" disabled selected>Select a service…</option>
+          <option>Door restoration &amp; refinishing</option>
+          <option>Drywall repair</option>
+          <option>Interior painting — walls</option>
+          <option>Trim, baseboard &amp; ceiling painting</option>
+          <option>Pre-sale prep</option>
+          <option>Property manager / tenant turnover</option>
+          <option>Multiple services</option>
+          <option>Not sure — need advice</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="cf-message">Tell us a little about the job</label>
+        <textarea id="cf-message" placeholder="e.g. 2 bedroom doors need refinishing, walls in good shape. Located in Lake Nona."></textarea>
+      </div>
+
+      <div class="consent-row">
+        <input type="checkbox" id="cf-sms-consent" name="smsConsent">
+        <label for="cf-sms-consent">
+          By submitting this form, I agree to receive SMS messages from
+          <strong>Specialty Home Painting</strong> regarding my service inquiry.
+          Message and data rates may apply. Reply <strong>STOP</strong> to opt out,
+          <strong>HELP</strong> for help.
+          View our <a href="/privacy.html" target="_blank">Privacy Policy</a>.
+        </label>
+      </div>
+
+      <button class="form-submit" id="cfSubmitBtn" onclick="submitContactForm()">Send my request</button>
+    </div>
+
+    <div class="form-success" id="contactFormSuccess">
+      <div class="form-success-icon">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h3>Request sent!</h3>
+      <p>Issam will follow up within 15 minutes. You can also call or text directly at <a href="tel:9045147016" style="color:var(--accent);">(904) 514-7016</a>.</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>© 2025 Specialty Home Painting — Orlando, FL</p>
+  <p>Licensed & insured · Registered Florida business</p>
+</footer>
+
+<!-- FLOATING CHAT BUTTON -->
+<button class="chat-fab" id="chatFab" onclick="openChat()">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+  </svg>
+  <span>Chat with us</span>
+</button>
+
+<!-- CHAT OVERLAY -->
+<div class="chat-overlay" id="chatOverlay" onclick="closeChat()"></div>
+
+<!-- CHAT POPUP -->
+<div class="chat-popup" id="chatPopup">
+  <div class="chat-header">
+    <div class="chat-header-info">
+      <div class="chat-avatar">SHP</div>
+      <div>
+        <div class="chat-name">Specialty Home Painting</div>
+        <div class="chat-status">● We reply within 15 minutes</div>
+      </div>
+    </div>
+    <button class="chat-close" onclick="closeChat()">✕</button>
+  </div>
+  <div class="chat-messages" id="chatMessages"></div>
+  <div class="chat-input-area" id="chatInputArea"></div>
+</div>
+
+<style>
+  .chat-fab { position: fixed; bottom: 2rem; right: 2rem; z-index: 1000; background: var(--accent); color: #fff; border: none; border-radius: 100px; padding: 14px 24px; font-size: 14px; font-weight: 500; font-family: var(--sans); cursor: pointer; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 20px rgba(42,92,63,0.35); transition: transform 0.2s, box-shadow 0.2s; }
+  .chat-fab:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(42,92,63,0.45); }
+  .chat-fab svg { width: 20px; height: 20px; }
+  .chat-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1001; }
+  .chat-overlay.active { display: block; }
+  .chat-popup { display: none; position: fixed; bottom: 6rem; right: 2rem; width: 380px; max-height: 580px; background: var(--warm-white); border-radius: 20px; border: 1px solid var(--border); z-index: 1002; flex-direction: column; box-shadow: 0 8px 40px rgba(0,0,0,0.15); overflow: hidden; }
+  .chat-popup.active { display: flex; }
+  .chat-header { background: var(--accent); padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; }
+  .chat-header-info { display: flex; align-items: center; gap: 12px; }
+  .chat-avatar { width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; color: #fff; }
+  .chat-name { font-size: 14px; font-weight: 500; color: #fff; }
+  .chat-status { font-size: 11px; color: rgba(255,255,255,0.75); margin-top: 2px; }
+  .chat-close { background: none; border: none; color: rgba(255,255,255,0.8); font-size: 16px; cursor: pointer; padding: 4px; }
+  .chat-close:hover { color: #fff; }
+  .chat-messages { flex: 1; overflow-y: auto; padding: 1.25rem; display: flex; flex-direction: column; gap: 12px; min-height: 300px; }
+  .msg { max-width: 85%; }
+  .msg.bot { align-self: flex-start; }
+  .msg.user { align-self: flex-end; }
+  .msg-bubble { padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.5; }
+  .msg.bot .msg-bubble { background: var(--cream); color: var(--charcoal); border-bottom-left-radius: 4px; }
+  .msg.user .msg-bubble { background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
+  .msg-time { font-size: 10px; color: var(--light); margin-top: 4px; padding: 0 4px; }
+  .chat-input-area { padding: 1rem 1.25rem; border-top: 1px solid var(--border); background: var(--warm-white); }
+  .chat-input-wrap { display: flex; gap: 8px; align-items: center; }
+  .chat-input { flex: 1; border: 1px solid var(--border); border-radius: 100px; padding: 10px 16px; font-size: 14px; font-family: var(--sans); background: var(--cream); color: var(--charcoal); outline: none; }
+  .chat-input:focus { border-color: var(--accent); }
+  .chat-send { background: var(--accent); color: #fff; border: none; border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: opacity 0.2s; }
+  .chat-send:hover { opacity: 0.85; }
+  .chat-send svg { width: 16px; height: 16px; }
+  .chat-options { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .chat-option { background: var(--warm-white); border: 1px solid var(--accent); color: var(--accent); border-radius: 100px; padding: 6px 14px; font-size: 13px; cursor: pointer; font-family: var(--sans); transition: all 0.2s; }
+  .chat-option:hover { background: var(--accent); color: #fff; }
+  .chat-option-persistent { background: var(--accent); color: #fff; }
+  .typing { display: flex; gap: 4px; align-items: center; padding: 10px 14px; background: var(--cream); border-radius: 16px; border-bottom-left-radius: 4px; width: fit-content; }
+  .typing span { width: 6px; height: 6px; background: var(--light); border-radius: 50%; animation: bounce 1.2s infinite; }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+
+  /* PDF MODAL */
+  #pdfModal { position: fixed; inset: 0; z-index: 2000; display: flex; align-items: center; justify-content: center; }
+  .pdf-modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.6); }
+  .pdf-modal-content { position: relative; z-index: 1; background: var(--warm-white); border-radius: 16px; width: 90vw; max-width: 800px; height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+  .pdf-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; background: var(--accent); color: #fff; }
+  .pdf-modal-title { font-size: 15px; font-weight: 500; }
+  .pdf-modal-actions { display: flex; gap: 8px; align-items: center; }
+  .pdf-btn-download { background: #fff; color: var(--accent); border: none; border-radius: 100px; padding: 6px 16px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: var(--sans); }
+  .pdf-btn-email { background: rgba(255,255,255,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.4); border-radius: 100px; padding: 6px 16px; font-size: 13px; cursor: pointer; font-family: var(--sans); }
+  .pdf-btn-close { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; padding: 4px 8px; }
+  .pdf-frame { flex: 1; border: none; width: 100%; }
+  .chat-option-quote { background: var(--accent); color: #fff; font-weight: 500; }
+  .chat-option-quote:hover { opacity: 0.85; background: var(--accent); }
+  @media (max-width: 480px) {
+    .chat-popup { bottom: 5rem; right: 1rem; left: 1rem; width: auto; border-radius: 20px; max-height: 80vh; }
+    .chat-fab { bottom: 1.5rem; right: 1.5rem; }
   }
-}
+</style>
 
-function generateAndEmailPDF(email) {
-  const pdfDataUrl = buildPDF();
-  // Send via EmailJS with PDF note
-  const summary = chatHistory
-    .map(m => `${m.role === 'user' ? 'Customer' : 'Agent'}: ${m.content}`)
-    .join('\n\n');
-
-  emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
-    name: customerName || 'Website Chat Visitor',
-    email: email,
-    customer_email: email,
-    phone: 'See quote',
-    service: currentQuote?.items?.map(i => i.description).join(', ') || 'See quote',
-    message: `QUOTE REQUESTED\n\nEstimate Total: $${currentQuote?.total_low} - $${currentQuote?.total_high}\n\nCHAT SUMMARY:\n\n${summary}\n\n[PDF quote attached — Issam will send the PDF directly]`
-  }).then(() => {
-    console.log('Quote email sent');
-  }).catch(err => {
-    console.error('Email error:', err);
-  });
-}
+<script>
+// ============================================================
+// EMAILJS — shared config (used by both contact form and chat)
+// ============================================================
+const EMAILJS_SERVICE    = 'service_s9zggu9';
+const EMAILJS_TEMPLATE   = 'template_yrs9zfk';
+const EMAILJS_PUBLIC_KEY = 'Tejd3zM9f6BJ9FpcE';
+emailjs.init(EMAILJS_PUBLIC_KEY);
 
 // ============================================================
-// EMAIL FUNCTIONS
+// CONTACT FORM — EmailJS submission + Google Sheets logging
 // ============================================================
-function sendChatSummary(email) {
-  const summary = chatHistory
-    .map(m => `${m.role === 'user' ? 'Customer' : 'Agent'}: ${m.content}`)
-    .join('\n\n');
+const CF_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwW4JaSlvo28cA2AjVDvCgUZX5aFUxoW6DSX0qndfN_Jm2VmSEcqWzbM_KPzadVw6G2/exec';
 
-  // Send to Issam — CC customer
-  emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
-    to_email: 'issam@specialtyhomepainting.com',
-    cc_email: email,
-    subject: `New Website Chat Lead — ${email}`,
-    name: customerName || 'Website Chat Visitor',
-    phone: 'Not provided',
-    message: `New lead from website chat.\nCustomer email: ${email}\n\nCHAT SUMMARY:\n\n${summary}`
-  });
+async function submitContactForm() {
+  const name    = document.getElementById('cf-name').value.trim();
+  const phone   = document.getElementById('cf-phone').value.trim();
+  const email   = document.getElementById('cf-email').value.trim();
+  const service = document.getElementById('cf-service').value;
+  const message = document.getElementById('cf-message').value.trim();
+  const consent = document.getElementById('cf-sms-consent').checked;
 
-  // Send to customer — CC Issam
-  emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
-    to_email: email,
-    cc_email: 'issam@specialtyhomepainting.com',
-    subject: 'Your Estimate Request — Specialty Home Painting',
-    name: 'Specialty Home Painting',
-    phone: '(904) 514-7016',
-    message: `Hi! Thank you for chatting with us.\n\nHere is a summary of your conversation:\n\n${summary}\n\nIssam will follow up with you shortly. You can also call or text at (904) 514-7016 or visit specialtyhomepainting.com`
-  }).then(() => {
-    showBotMessage(`✅ Your request has been sent! You should receive a copy at ${email}. Issam will follow up within 15 minutes. You can also call or text directly at (904) 514-7016. 😊`);
-    showQuickButtons(['📄 View Quote', '📞 Call Issam', '✕ Close chat']);
-  }).catch(err => {
+  // Basic validation
+  if (!name) { alert('Please enter your name.'); return; }
+  if (!phone && !email) { alert('Please enter at least a phone number or email address.'); return; }
+  if (!service) { alert('Please select a service.'); return; }
+  if (!message) { alert('Please tell us a little about the job.'); return; }
+
+  const btn = document.getElementById('cfSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+
+  const timestamp = new Date().toISOString();
+  const consentText = consent
+    ? 'YES — agreed to SMS consent at ' + timestamp
+    : 'NO — did not opt in to SMS';
+
+  // 1. Send email via EmailJS
+  try {
+    await emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
+      name: name,
+      email: email || 'Not provided',
+      customer_email: email || 'Not provided',
+      phone: phone || 'Not provided',
+      service: service,
+      message: message + '\n\nSMS Consent: ' + consentText
+    });
+  } catch(err) {
     console.error('EmailJS error:', err);
-    showBotMessage(`✅ Thanks! Issam will be in touch shortly at ${email}.`);
-  });
-}
+  }
 
-function sendEmailToCustomer(email, subject, body) {
-  emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
-    name: customerName || 'Customer',
-    email: 'issam@specialtyhomepainting.com',
-    customer_email: email,
-    phone: 'Not provided',
-    service: subject || 'Follow up',
-    message: body || 'Thank you for contacting Specialty Home Painting.'
-  });
-}
+  // 2. Log to Google Sheets (fire and forget)
+  try {
+    const params = new URLSearchParams({
+      name, phone, email, service, message,
+      sms_consent: consent ? 'YES' : 'NO',
+      consent_timestamp: timestamp,
+      source: 'Website Contact Form'
+    });
+    fetch(CF_SHEETS_URL + '?' + params.toString()).catch(() => {});
+  } catch(err) {
+    console.error('Sheets log error:', err);
+  }
 
-function sendEmailToIssam(subject, body) {
-  const summary = chatHistory
-    .map(m => `${m.role === 'user' ? 'Customer' : 'Agent'}: ${m.content}`)
-    .join('\n\n');
-
-  emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
-    name: 'Website Chat',
-    email: 'issam@specialtyhomepainting.com',
-    customer_email: customerEmail || 'unknown',
-    phone: 'Not provided',
-    service: subject || 'Chat notification',
-    message: body || summary
-  });
+  // 3. Show success state
+  document.getElementById('contactFormBody').style.display = 'none';
+  document.getElementById('contactFormSuccess').style.display = 'block';
 }
+</script>
+
+<script src="chat.js"></script>
+
+<script src="https://api.foyer.ink/static/widget.js" data-agent-id="tl_a89381f3ff57" data-server="https://api.foyer.ink" async></script>
+
+</body>
+</html>
