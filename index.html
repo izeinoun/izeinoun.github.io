@@ -33,12 +33,6 @@
   .nav-links a:hover { color: var(--charcoal); }
   .nav-cta { background: var(--accent) !important; color: #fff !important; padding: 8px 20px; border-radius: 100px; font-size: 13px !important; font-weight: 500 !important; }
   .hero { min-height: 88vh; display: grid; grid-template-columns: 1fr 1fr; align-items: center; max-width: 1100px; margin: 0 auto; padding: 5rem 2rem 4rem; gap: 4rem; }
-  .identity-card { display: inline-flex; align-items: center; gap: 16px; background: var(--cream); border: 1px solid var(--border); border-radius: 100px; padding: 8px 24px 8px 8px; margin-bottom: 1.5rem; }
-  .identity-photo { width: 56px; height: 56px; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 2px solid var(--accent); }
-  .identity-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center 10%; display: block; }
-  .identity-text { display: flex; flex-direction: column; }
-  .identity-name { font-size: 15px; font-weight: 500; color: var(--charcoal); line-height: 1.2; }
-  .identity-sub { font-size: 12.5px; color: var(--mid); line-height: 1.4; font-weight: 300; max-width: 260px; margin-top: 2px; }
   .hero-eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 1.5rem; }
   .hero-eyebrow::before { content: ''; display: inline-block; width: 24px; height: 1px; background: var(--accent); }
   .hero h1 { font-family: var(--serif); font-size: clamp(38px, 5vw, 56px); line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 1.5rem; }
@@ -108,12 +102,8 @@
 
   /* ABOUT */
   .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
-  .about-photos { display: flex; flex-direction: column; gap: 12px; }
-  .about-img { border-radius: 20px; overflow: hidden; border: 1px solid var(--border); position: relative; }
+  .about-img { border-radius: 20px; overflow: hidden; aspect-ratio: 3/4; border: 1px solid var(--border); }
   .about-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .about-img.primary { aspect-ratio: 4/3; }
-  .about-img.secondary { aspect-ratio: 4/3; }
-  .about-img-label { position: absolute; bottom: 10px; left: 10px; background: rgba(28,28,26,0.72); color: #fff; font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 100px; letter-spacing: 0.04em; }
   .about-text p { font-size: 15px; color: var(--mid); line-height: 1.8; font-weight: 300; margin-bottom: 1rem; }
   .about-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 2rem; }
   .about-stat { background: var(--cream); border-radius: 12px; padding: 1.25rem; border: 1px solid var(--border); }
@@ -147,12 +137,46 @@
   /* CTA */
   .cta-section { background: var(--cream); border-top: 1px solid var(--border); padding: 5rem 2rem; text-align: center; }
   .cta-section h2 { font-family: var(--serif); font-size: clamp(32px, 4vw, 48px); letter-spacing: -0.02em; margin-bottom: 1rem; }
-  .cta-section p { font-size: 16px; color: var(--mid); margin-bottom: 3rem; font-weight: 300; }
-  .contact-row { display: inline-flex; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; flex-wrap: wrap; }
+  .cta-section > p { font-size: 16px; color: var(--mid); margin-bottom: 3rem; font-weight: 300; }
+  .contact-row { display: inline-flex; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; flex-wrap: wrap; margin-bottom: 3rem; }
   .contact-cell { background: var(--warm-white); padding: 1.5rem 2rem; text-align: left; min-width: 180px; }
   .contact-cell-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--light); margin-bottom: 6px; }
   .contact-cell-value { font-size: 15px; font-weight: 500; color: var(--charcoal); text-decoration: none; }
   .contact-cell-value:hover { color: var(--accent); }
+
+  /* CONTACT FORM */
+  .contact-form-wrap { max-width: 560px; margin: 0 auto; background: var(--warm-white); border: 1px solid var(--border); border-radius: 20px; padding: 2.5rem; text-align: left; }
+  .contact-form-title { font-family: var(--serif); font-size: 22px; margin-bottom: 0.25rem; }
+  .contact-form-sub { font-size: 13px; color: var(--mid); margin-bottom: 1.75rem; font-weight: 300; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+  .form-group label { font-size: 12px; font-weight: 500; color: var(--charcoal); letter-spacing: 0.02em; }
+  .form-group input, .form-group select, .form-group textarea {
+    border: 1px solid var(--border); border-radius: 10px; padding: 11px 14px;
+    font-size: 14px; font-family: var(--sans); background: var(--cream);
+    color: var(--charcoal); outline: none; transition: border-color 0.2s; width: 100%;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent); }
+  .form-group textarea { resize: vertical; min-height: 90px; line-height: 1.5; }
+  .form-group select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B6860' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+  .consent-row { display: flex; gap: 10px; align-items: flex-start; margin: 1.25rem 0; padding: 1rem; background: var(--accent-light); border-radius: 10px; border: 1px solid rgba(42,92,63,0.15); }
+  .consent-row input[type="checkbox"] { margin-top: 2px; accent-color: var(--accent); width: 16px; height: 16px; flex-shrink: 0; cursor: pointer; }
+  .consent-row label { font-size: 12px; color: var(--mid); line-height: 1.55; cursor: pointer; }
+  .consent-row label strong { color: var(--charcoal); font-weight: 500; }
+  .consent-row label a { color: var(--accent); text-decoration: none; }
+  .consent-row label a:hover { text-decoration: underline; }
+  .form-submit { width: 100%; background: var(--accent); color: #fff; border: none; border-radius: 100px; padding: 14px 28px; font-size: 14px; font-weight: 500; font-family: var(--sans); cursor: pointer; transition: opacity 0.2s; margin-top: 0.5rem; }
+  .form-submit:hover { opacity: 0.88; }
+  .form-submit:disabled { opacity: 0.55; cursor: not-allowed; }
+  .form-success { display: none; text-align: center; padding: 2rem 1rem; }
+  .form-success-icon { width: 52px; height: 52px; background: var(--accent-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
+  .form-success-icon svg { width: 22px; height: 22px; stroke: var(--accent); fill: none; stroke-width: 2.5; }
+  .form-success h3 { font-family: var(--serif); font-size: 22px; margin-bottom: 0.5rem; }
+  .form-success p { font-size: 14px; color: var(--mid); font-weight: 300; }
+  @media (max-width: 768px) {
+    .form-row { grid-template-columns: 1fr; }
+    .contact-form-wrap { padding: 1.75rem 1.25rem; }
+  }
   footer { padding: 1.5rem 2rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; max-width: 1100px; margin: 0 auto; }
   footer p { font-size: 12px; color: var(--light); }
 
@@ -166,8 +190,6 @@
     .nav-links { display: none; }
     .ba-grid { grid-template-columns: 1fr; }
     .about-grid { grid-template-columns: 1fr; }
-    .about-photos { flex-direction: row; }
-    .about-img.primary, .about-img.secondary { aspect-ratio: 1; }
     .photo-grid { grid-template-columns: repeat(2, 1fr); }
     .section { padding: 3.5rem 1.5rem; }
     .gallery-section { padding: 3.5rem 1.5rem; }
@@ -193,15 +215,6 @@
 <section>
   <div class="hero">
     <div class="hero-text">
-      <div class="identity-card">
-        <div class="identity-photo">
-          <img src="issam-cropped.jpg" alt="Issam — Specialty Home Painting">
-        </div>
-        <div class="identity-text">
-          <div class="identity-name">Your unusual contractor.</div>
-          <div class="identity-sub">Tech professional by week, precision painter by weekend — your neighbor, not a crew.</div>
-        </div>
-      </div>
       <div class="hero-eyebrow">Orlando, FL — Repair & Refinish</div>
       <h1>Your home,<br><em>restored</em> to its<br>best finish.</h1>
       <p class="hero-desc">We fix cracks, patch drywall, restore worn doors, and deliver a flawless enamel finish — repair and refinish in a single engagement.</p>
@@ -223,7 +236,7 @@
           </div>
         </div>
         <div class="hero-stat-grid">
-          <div class="hero-stat"><div class="hero-stat-num">5+</div><div class="hero-stat-label">Years of experience</div></div>
+          <div class="hero-stat"><div class="hero-stat-num">20+</div><div class="hero-stat-label">Years of experience</div></div>
           <div class="hero-stat"><div class="hero-stat-num">5★</div><div class="hero-stat-label">Rated on Thumbtack</div></div>
           <div class="hero-stat"><div class="hero-stat-num">1</div><div class="hero-stat-label">Vendor, all trades</div></div>
           <div class="hero-stat"><div class="hero-stat-num">0</div><div class="hero-stat-label">Painted-over problems</div></div>
@@ -346,24 +359,17 @@
 
 <div class="section" id="about">
   <div class="about-grid">
-    <div class="about-photos">
-      <div class="about-img primary">
-        <img src="issam-drywall.jpg" alt="Issam applying drywall skim coat — Specialty Home Painting Orlando">
-        <span class="about-img-label">Drywall repair & skim coat</span>
-      </div>
-      <div class="about-img secondary">
-        <img src="issam-door-suspension.jpg" alt="Issam with door on horizontal suspension rig — Specialty Home Painting Orlando">
-        <span class="about-img-label">Door suspension technique</span>
-      </div>
+    <div class="about-img">
+      <img src="door painting 1.jpg" alt="Issam at work — Specialty Home Painting Orlando">
     </div>
     <div class="about-text">
       <div class="section-label">About</div>
-      <h2>5+ years of hands-on experience</h2>
+      <h2>20+ years of hands-on experience</h2>
       <p>I'm Issam, and I've been working with paint, drywall, and wood for over two decades. What separates my work from the average painter is simple — I fix problems before I paint over them.</p>
       <p>Every job gets the same workshop-grade attention to detail, whether it's a single door or a full unit turnover. I show up on time, work clean, and don't leave until it's right.</p>
       <p>Based in Orlando, FL — serving homeowners, property managers, and real estate agents across the greater Orlando area.</p>
       <div class="about-stats">
-        <div class="about-stat"><div class="about-stat-num">5+</div><div class="about-stat-label">Years experience</div></div>
+        <div class="about-stat"><div class="about-stat-num">20+</div><div class="about-stat-label">Years experience</div></div>
         <div class="about-stat"><div class="about-stat-num">5★</div><div class="about-stat-label">Thumbtack rating</div></div>
         <div class="about-stat"><div class="about-stat-num">1</div><div class="about-stat-label">Vendor for all trades</div></div>
         <div class="about-stat"><div class="about-stat-num">0</div><div class="about-stat-label">Painted-over problems</div></div>
@@ -415,11 +421,75 @@
 
 <div class="cta-section" id="contact">
   <h2>Ready for a free estimate?</h2>
-  <p>Call, text, or email — we respond fast. Serving Orlando and surrounding areas.</p>
+  <p>Call, text, or fill out the form — we respond within 15 minutes. Serving Orlando and surrounding areas.</p>
   <div class="contact-row">
     <div class="contact-cell"><div class="contact-cell-label">Phone & text</div><a href="tel:9045147016" class="contact-cell-value">(904) 514-7016</a></div>
     <div class="contact-cell"><div class="contact-cell-label">Email</div><a href="mailto:issam@specialtyhomepainting.com" class="contact-cell-value">issam@specialtyhomepainting.com</a></div>
     <div class="contact-cell"><div class="contact-cell-label">Service area</div><span class="contact-cell-value">Greater Orlando, FL</span></div>
+  </div>
+
+  <div class="contact-form-wrap">
+    <div id="contactFormBody">
+      <div class="contact-form-title">Send us a message</div>
+      <p class="contact-form-sub">Tell us about your project and we'll get back to you fast.</p>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="cf-name">Your name</label>
+          <input type="text" id="cf-name" placeholder="Jane Smith" autocomplete="name">
+        </div>
+        <div class="form-group">
+          <label for="cf-phone">Phone number</label>
+          <input type="tel" id="cf-phone" placeholder="(407) 555-0100" autocomplete="tel">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="cf-email">Email address</label>
+        <input type="email" id="cf-email" placeholder="jane@email.com" autocomplete="email">
+      </div>
+
+      <div class="form-group">
+        <label for="cf-service">What service are you looking for?</label>
+        <select id="cf-service">
+          <option value="" disabled selected>Select a service…</option>
+          <option>Door restoration &amp; refinishing</option>
+          <option>Drywall repair</option>
+          <option>Interior painting — walls</option>
+          <option>Trim, baseboard &amp; ceiling painting</option>
+          <option>Pre-sale prep</option>
+          <option>Property manager / tenant turnover</option>
+          <option>Multiple services</option>
+          <option>Not sure — need advice</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="cf-message">Tell us a little about the job</label>
+        <textarea id="cf-message" placeholder="e.g. 2 bedroom doors need refinishing, walls in good shape. Located in Lake Nona."></textarea>
+      </div>
+
+      <div class="consent-row">
+        <input type="checkbox" id="cf-sms-consent" name="smsConsent">
+        <label for="cf-sms-consent">
+          By submitting this form, I agree to receive SMS messages from
+          <strong>Specialty Home Painting</strong> regarding my service inquiry.
+          Message and data rates may apply. Reply <strong>STOP</strong> to opt out,
+          <strong>HELP</strong> for help.
+          View our <a href="/privacy.html" target="_blank">Privacy Policy</a>.
+        </label>
+      </div>
+
+      <button class="form-submit" id="cfSubmitBtn" onclick="submitContactForm()">Send my request</button>
+    </div>
+
+    <div class="form-success" id="contactFormSuccess">
+      <div class="form-success-icon">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h3>Request sent!</h3>
+      <p>Issam will follow up within 15 minutes. You can also call or text directly at <a href="tel:9045147016" style="color:var(--accent);">(904) 514-7016</a>.</p>
+    </div>
   </div>
 </div>
 
@@ -513,6 +583,68 @@
     .chat-fab { bottom: 1.5rem; right: 1.5rem; }
   }
 </style>
+
+<script>
+// ============================================================
+// CONTACT FORM — EmailJS submission + Google Sheets logging
+// ============================================================
+const CF_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwW4JaSlvo28cA2AjVDvCgUZX5aFUxoW6DSX0qndfN_Jm2VmSEcqWzbM_KPzadVw6G2/exec';
+
+async function submitContactForm() {
+  const name    = document.getElementById('cf-name').value.trim();
+  const phone   = document.getElementById('cf-phone').value.trim();
+  const email   = document.getElementById('cf-email').value.trim();
+  const service = document.getElementById('cf-service').value;
+  const message = document.getElementById('cf-message').value.trim();
+  const consent = document.getElementById('cf-sms-consent').checked;
+
+  // Basic validation
+  if (!name) { alert('Please enter your name.'); return; }
+  if (!phone && !email) { alert('Please enter at least a phone number or email address.'); return; }
+  if (!service) { alert('Please select a service.'); return; }
+  if (!message) { alert('Please tell us a little about the job.'); return; }
+
+  const btn = document.getElementById('cfSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+
+  const timestamp = new Date().toISOString();
+  const consentText = consent
+    ? 'YES — agreed to SMS consent at ' + timestamp
+    : 'NO — did not opt in to SMS';
+
+  // 1. Send email via EmailJS
+  try {
+    await emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
+      name: name,
+      email: email || 'Not provided',
+      customer_email: email || 'Not provided',
+      phone: phone || 'Not provided',
+      service: service,
+      message: message + '\n\nSMS Consent: ' + consentText
+    });
+  } catch(err) {
+    console.error('EmailJS error:', err);
+  }
+
+  // 2. Log to Google Sheets (fire and forget)
+  try {
+    const params = new URLSearchParams({
+      name, phone, email, service, message,
+      sms_consent: consent ? 'YES' : 'NO',
+      consent_timestamp: timestamp,
+      source: 'Website Contact Form'
+    });
+    fetch(CF_SHEETS_URL + '?' + params.toString()).catch(() => {});
+  } catch(err) {
+    console.error('Sheets log error:', err);
+  }
+
+  // 3. Show success state
+  document.getElementById('contactFormBody').style.display = 'none';
+  document.getElementById('contactFormSuccess').style.display = 'block';
+}
+</script>
 
 <script src="chat.js"></script>
 
