@@ -110,8 +110,12 @@
 
   /* ABOUT */
   .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
-  .about-img { border-radius: 20px; overflow: hidden; aspect-ratio: 3/4; border: 1px solid var(--border); }
+  .about-photos { display: flex; flex-direction: column; gap: 12px; }
+  .about-img { border-radius: 20px; overflow: hidden; border: 1px solid var(--border); position: relative; }
   .about-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .about-img.primary { aspect-ratio: 4/3; }
+  .about-img.secondary { aspect-ratio: 4/3; }
+  .about-img-label { position: absolute; bottom: 10px; left: 10px; background: rgba(28,28,26,0.72); color: #fff; font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 100px; letter-spacing: 0.04em; }
   .about-text p { font-size: 15px; color: var(--mid); line-height: 1.8; font-weight: 300; margin-bottom: 1rem; }
   .about-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 2rem; }
   .about-stat { background: var(--cream); border-radius: 12px; padding: 1.25rem; border: 1px solid var(--border); }
@@ -164,6 +168,8 @@
     .nav-links { display: none; }
     .ba-grid { grid-template-columns: 1fr; }
     .about-grid { grid-template-columns: 1fr; }
+    .about-photos { flex-direction: row; }
+    .about-img.primary, .about-img.secondary { aspect-ratio: 1; }
     .photo-grid { grid-template-columns: repeat(2, 1fr); }
     .section { padding: 3.5rem 1.5rem; }
     .gallery-section { padding: 3.5rem 1.5rem; }
@@ -342,8 +348,15 @@
 
 <div class="section" id="about">
   <div class="about-grid">
-    <div class="about-img">
-      <img src="door painting 1.jpg" alt="Issam at work — Specialty Home Painting Orlando">
+    <div class="about-photos">
+      <div class="about-img primary">
+        <img src="issam-drywall.jpg" alt="Issam applying drywall skim coat — Specialty Home Painting Orlando">
+        <span class="about-img-label">Drywall repair & skim coat</span>
+      </div>
+      <div class="about-img secondary">
+        <img src="issam-door-suspension.jpg" alt="Issam with door on horizontal suspension rig — Specialty Home Painting Orlando">
+        <span class="about-img-label">Door suspension technique</span>
+      </div>
     </div>
     <div class="about-text">
       <div class="section-label">About</div>
@@ -410,6 +423,56 @@
     <div class="contact-cell"><div class="contact-cell-label">Email</div><a href="mailto:issam@specialtyhomepainting.com" class="contact-cell-value">issam@specialtyhomepainting.com</a></div>
     <div class="contact-cell"><div class="contact-cell-label">Service area</div><span class="contact-cell-value">Greater Orlando, FL</span></div>
   </div>
+
+  <div class="contact-form-wrap">
+    <h3>Send us a message</h3>
+    <div id="contactFormBody">
+      <div class="cf-row">
+        <div class="cf-field">
+          <label for="cf-name">Your name *</label>
+          <input type="text" id="cf-name" placeholder="Jane Smith">
+        </div>
+        <div class="cf-field">
+          <label for="cf-phone">Phone number</label>
+          <input type="tel" id="cf-phone" placeholder="(407) 555-0100">
+        </div>
+      </div>
+      <div class="cf-row">
+        <div class="cf-field">
+          <label for="cf-email">Email address</label>
+          <input type="email" id="cf-email" placeholder="jane@email.com">
+        </div>
+        <div class="cf-field">
+          <label for="cf-service">Service needed *</label>
+          <select id="cf-service">
+            <option value="">Select a service…</option>
+            <option>Door restoration</option>
+            <option>Drywall repair</option>
+            <option>Interior painting</option>
+            <option>Trim & baseboard painting</option>
+            <option>Ceiling painting</option>
+            <option>Pre-sale prep</option>
+            <option>Property manager turnover</option>
+            <option>Multiple / not sure</option>
+          </select>
+        </div>
+      </div>
+      <div class="cf-field">
+        <label for="cf-message">Tell us about the job *</label>
+        <textarea id="cf-message" placeholder="E.g. 2 bedroom doors need refinishing, walls in good condition. Located in Lake Nona."></textarea>
+      </div>
+      <div class="consent-row">
+        <input type="checkbox" id="cf-sms-consent">
+        <label for="cf-sms-consent">By submitting this form, I agree to receive SMS messages from <strong>Specialty Home Painting</strong> regarding my service inquiry. Message and data rates may apply. Reply <strong>STOP</strong> to opt out.</label>
+      </div>
+      <button class="form-submit" id="cfSubmitBtn" onclick="submitContactForm()">Send my request</button>
+    </div>
+    <div class="form-success" id="contactFormSuccess">
+      <div class="form-success-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <h3>Request sent!</h3>
+      <p>Issam will follow up within 15 minutes. You can also call or text at <a href="tel:9045147016" style="color:var(--accent);">(904) 514-7016</a>.</p>
+    </div>
+  </div>
 </div>
 
 <footer>
@@ -445,6 +508,28 @@
 </div>
 
 <style>
+  /* CONTACT FORM */
+  .contact-form-wrap { max-width: 640px; margin: 3rem auto 0; text-align: left; }
+  .contact-form-wrap h3 { font-family: var(--serif); font-size: 22px; margin-bottom: 1.5rem; text-align: center; }
+  .cf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .cf-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+  .cf-field label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--light); }
+  .cf-field input, .cf-field select, .cf-field textarea { border: 1px solid var(--border); border-radius: 10px; padding: 11px 14px; font-size: 14px; font-family: var(--sans); background: var(--warm-white); color: var(--charcoal); outline: none; width: 100%; transition: border-color 0.2s; }
+  .cf-field input:focus, .cf-field select:focus, .cf-field textarea:focus { border-color: var(--accent); }
+  .cf-field textarea { resize: vertical; min-height: 110px; }
+  .consent-row { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 1.5rem; font-size: 12px; color: var(--mid); line-height: 1.5; }
+  .consent-row input[type="checkbox"] { margin-top: 2px; flex-shrink: 0; accent-color: var(--accent); }
+  .consent-row a { color: var(--accent); }
+  .form-submit { background: var(--accent); color: #fff; border: none; border-radius: 100px; padding: 14px 36px; font-size: 14px; font-weight: 500; font-family: var(--sans); cursor: pointer; width: 100%; transition: opacity 0.2s; }
+  .form-submit:hover { opacity: 0.88; }
+  .form-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+  .form-success { display: none; text-align: center; padding: 2rem; }
+  .form-success-icon { width: 56px; height: 56px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
+  .form-success-icon svg { width: 24px; height: 24px; stroke: #fff; fill: none; stroke-width: 2.5; }
+  .form-success h3 { font-family: var(--serif); font-size: 22px; margin-bottom: 0.5rem; }
+  .form-success p { font-size: 14px; color: var(--mid); }
+  @media (max-width: 768px) { .cf-row { grid-template-columns: 1fr; } }
+
   .chat-fab { position: fixed; bottom: 2rem; right: 2rem; z-index: 1000; background: var(--accent); color: #fff; border: none; border-radius: 100px; padding: 14px 24px; font-size: 14px; font-weight: 500; font-family: var(--sans); cursor: pointer; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 20px rgba(42,92,63,0.35); transition: transform 0.2s, box-shadow 0.2s; }
   .chat-fab:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(42,92,63,0.45); }
   .chat-fab svg { width: 20px; height: 20px; }
@@ -502,6 +587,62 @@
     .chat-fab { bottom: 1.5rem; right: 1.5rem; }
   }
 </style>
+
+<script>
+// ============================================================
+// CONTACT FORM — EmailJS + Google Sheets logging
+// ============================================================
+const CF_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzKYiczIj5U_Wjj4_qqb5bs8jqoU1GkI9ZhD2bf88_rhP1scjT8MgiDQnTwDE9DF2XV5A/exec';
+
+async function submitContactForm() {
+  const name    = document.getElementById('cf-name').value.trim();
+  const phone   = document.getElementById('cf-phone').value.trim();
+  const email   = document.getElementById('cf-email').value.trim();
+  const service = document.getElementById('cf-service').value;
+  const message = document.getElementById('cf-message').value.trim();
+  const consent = document.getElementById('cf-sms-consent').checked;
+
+  if (!name)              { alert('Please enter your name.'); return; }
+  if (!phone && !email)   { alert('Please enter at least a phone number or email address.'); return; }
+  if (!service)           { alert('Please select a service.'); return; }
+  if (!message)           { alert('Please tell us a little about the job.'); return; }
+
+  const btn = document.getElementById('cfSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+
+  const timestamp   = new Date().toISOString();
+  const consentText = consent ? 'YES — agreed to SMS consent at ' + timestamp : 'NO';
+
+  // 1. Send email via EmailJS (uses constants defined in chat.js — loaded after this script runs,
+  //    but emailjs SDK and init are available because chat.js loads synchronously before DOMContentLoaded)
+  try {
+    await emailjs.send('service_s9zggu9', 'template_yrs9zfk', {
+      name:           name,
+      email:          email || 'Not provided',
+      customer_email: email || 'Not provided',
+      phone:          phone || 'Not provided',
+      service:        service,
+      message:        message + '\n\nSMS Consent: ' + consentText
+    });
+  } catch(err) {
+    console.error('EmailJS error:', err);
+  }
+
+  // 2. Log to Google Sheets (fire and forget)
+  try {
+    const params = new URLSearchParams({ name, phone, email, service, message,
+      sms_consent: consent ? 'YES' : 'NO', consent_timestamp: timestamp, source: 'Website Contact Form' });
+    fetch(CF_SHEETS_URL + '?' + params.toString()).catch(() => {});
+  } catch(err) {
+    console.error('Sheets log error:', err);
+  }
+
+  // 3. Show success
+  document.getElementById('contactFormBody').style.display = 'none';
+  document.getElementById('contactFormSuccess').style.display = 'block';
+}
+</script>
 
 <script src="chat.js"></script>
 
