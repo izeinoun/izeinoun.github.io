@@ -11,7 +11,7 @@
   gtag('config', 'G-B4MTKS754B');
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" type="image/png" href="/logo.png">
+<link rel="icon" type="image/png" href="/favicon.png">
 <title>Specialty Home Painting — Orlando, FL</title>
 <meta name="description" content="Expert door restoration, drywall repair, and precision trim and ceiling painting in Orlando, FL. Serving homeowners, property managers, and real estate agents.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -36,7 +36,10 @@
   html { scroll-behavior: smooth; }
   body { font-family: var(--sans); background: var(--warm-white); color: var(--charcoal); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
   nav { position: sticky; top: 0; z-index: 100; background: rgba(253,252,250,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 60px; }
-  .nav-brand { font-family: var(--serif); font-size: 18px; color: var(--charcoal); text-decoration: none; }
+  .nav-brand { display: flex; align-items: center; gap: 10px; font-family: var(--serif); font-size: 18px; color: var(--charcoal); text-decoration: none; }
+  .nav-brand img { height: 34px; width: 34px; display: block; }
+  .footer-logo { height: 68px; width: auto; display: block; }
+  .footer-meta { text-align: right; }
   .nav-links { display: flex; align-items: center; gap: 2rem; list-style: none; }
   .nav-links a { font-size: 13px; color: var(--mid); text-decoration: none; transition: color 0.2s; }
   .nav-links a:hover { color: var(--charcoal); }
@@ -219,7 +222,7 @@
 <body>
 
 <nav>
-  <a href="#" class="nav-brand">Specialty Home Painting</a>
+  <a href="#" class="nav-brand"><img src="/favicon.png" alt="Specialty Home Painting logo">Specialty Home Painting</a>
   <ul class="nav-links">
     <li><a href="#services">Services</a></li>
     <li><a href="#gallery">Gallery</a></li>
@@ -528,8 +531,11 @@
 </div>
 
 <footer>
-  <p>© 2025 Specialty Home Painting — Orlando, FL</p>
-  <p>Licensed & insured · Registered Florida business</p>
+  <img src="/logo.png" alt="Specialty Home Painting" class="footer-logo">
+  <div class="footer-meta">
+    <p>© 2025 Specialty Home Painting — Orlando, FL</p>
+    <p>Licensed & insured · Registered Florida business</p>
+  </div>
 </footer>
 
 <!-- FLOATING CHAT BUTTON -->
