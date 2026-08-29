@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 388 64" width="388" height="64" role="img" aria-label="Specialty Home Painting — Repair & Refinish, Orlando FL">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&amp;family=DM+Sans:wght@400;500&amp;display=swap');
+      .wordmark { font-family: 'DM Serif Display', Georgia, 'Times New Roman', serif; font-size: 26px; fill: #1C1C1A; }
+      .tagline  { font-family: 'DM Sans', Arial, sans-serif; font-size: 11px; font-weight: 500; letter-spacing: 0.06em; fill: #6B6860; }
+    </style>
+  </defs>
+
+  <!-- door mark -->
+  <g transform="translate(2,8)">
+    <rect width="48" height="48" rx="11" fill="#2A5C3F"/>
+    <g transform="translate(8,8) scale(1.0)" fill="none" stroke="#FDFCFA" stroke-width="2.4" stroke-linejoin="round">
+      <rect x="9.5" y="6" width="13" height="20" rx="1.2"/>
+      <rect x="11.7" y="8.3" width="8.6" height="7.1" rx="0.6"/>
+      <rect x="11.7" y="16.6" width="8.6" height="7.1" rx="0.6"/>
+    </g>
+    <circle cx="26.8" cy="24" r="1.5" fill="#FDFCFA"/>
+  </g>
+
+  <!-- wordmark + tagline -->
+  <text class="wordmark" x="64" y="32">Specialty Home Painting</text>
+  <text class="tagline"  x="65" y="49">REPAIR &amp; REFINISH &#183; ORLANDO, FL</text>
+</svg>
